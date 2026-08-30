@@ -1,0 +1,164 @@
+{
+  "$id": "https://raw.githubusercontent.com/deploykithq/templates/main/schema/template.schema.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Editor hint. Ignored by DeployKit."
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "logo": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "github": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500
+        },
+        "website": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500
+        },
+        "docs": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 30
+      },
+      "maxItems": 10,
+      "default": []
+    },
+    "variables": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 2000
+      },
+      "propertyNames": {
+        "minLength": 1,
+        "maxLength": 64,
+        "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+      },
+      "default": {}
+    },
+    "domains": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]*$"
+          },
+          "port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "host": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "path": {
+            "type": "string",
+            "maxLength": 255
+          }
+        },
+        "required": [
+          "service",
+          "port",
+          "host"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 10,
+      "default": []
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 10000
+      },
+      "propertyNames": {
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+      },
+      "default": {}
+    },
+    "mounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^(?!.*\\.\\.)[A-Za-z0-9._][A-Za-z0-9._\\-/]*$"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 100000
+          }
+        },
+        "required": [
+          "filePath",
+          "content"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20,
+      "default": []
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "version",
+    "description"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DeployKit blueprint",
+  "description": "A one-click template: metadata, generated variables, routing, environment and config files. Never contains a secret — it declares how one is derived."
+}

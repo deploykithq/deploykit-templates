@@ -1,0 +1,22 @@
+{
+  "name": "deploykit-templates",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "One-click blueprints for DeployKit",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deploykithq/templates.git"
+  },
+  "scripts": {
+    "index": "node scripts/build-index.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "node scripts/build-index.mjs && node scripts/validate.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "yaml": "^2.6.0"
+  }
+}

@@ -1,0 +1,31 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # No lockfile is committed — the three dev dependencies are validation
+      # tooling, not something the catalogue ships.
+      - run: npm install --no-package-lock
+
+      - name: Validate every blueprint
+        run: node scripts/validate.mjs
+
+      # index.json is what DeployKit fetches; validate.mjs fails when it is
+      # stale, and this makes the fix obvious rather than a puzzle.
+      - name: Show the index a contributor should have committed
+        if: failure()
+        run: |
+          node scripts/build-index.mjs
+          git --no-pager diff -- index.json || true

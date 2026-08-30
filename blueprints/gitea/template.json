@@ -1,0 +1,33 @@
+{
+  "$schema": "../../schema/template.schema.json",
+  "id": "gitea",
+  "name": "Gitea",
+  "version": "1",
+  "description": "Self-hosted Git service with issues and pull requests. Complete the setup wizard on first visit.",
+  "logo": "logo.svg",
+  "links": {
+    "github": "https://github.com/go-gitea/gitea",
+    "website": "https://about.gitea.com",
+    "docs": "https://docs.gitea.com"
+  },
+  "tags": [
+    "git",
+    "vcs"
+  ],
+  "variables": {
+    "main_domain": "${domain}",
+    "ssh_port": "${randomPort}"
+  },
+  "domains": [
+    {
+      "service": "gitea",
+      "port": 3000,
+      "host": "${main_domain}"
+    }
+  ],
+  "env": {
+    "MAIN_DOMAIN": "${main_domain}",
+    "SSH_PORT": "${ssh_port}"
+  },
+  "mounts": []
+}
