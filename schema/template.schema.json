@@ -1,5 +1,5 @@
 {
-  "$id": "https://raw.githubusercontent.com/deploykithq/templates/main/schema/template.schema.json",
+  "$id": "https://raw.githubusercontent.com/deploykithq/deploykit-templates/master/schema/template.schema.json",
   "type": "object",
   "properties": {
     "$schema": {

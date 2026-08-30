@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/deploykithq/templates.git"
+    "url": "https://github.com/deploykithq/deploykit-templates.git"
   },
   "scripts": {
     "index": "node scripts/build-index.mjs",
