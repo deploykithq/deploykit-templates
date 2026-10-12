@@ -1,0 +1,177 @@
+{
+  "$schema": "../../schema/game.schema.json",
+  "id": "minecraft-java",
+  "name": "Minecraft: Java Edition",
+  "version": "1",
+  "description": "Minecraft Java server — Vanilla, Paper, Fabric or Forge — with RCON console, world backups and editable server.properties.",
+  "logo": "logo.svg",
+  "links": {
+    "github": "https://github.com/itzg/docker-minecraft-server",
+    "docs": "https://docker-minecraft-server.readthedocs.io"
+  },
+  "tags": ["minecraft", "sandbox", "java"],
+  "category": "sandbox",
+  "players": { "min": 1, "max": 100 },
+  "image": "itzg/minecraft-server:${java_tag}",
+  "ports": [
+    {
+      "name": "game",
+      "protocol": "tcp",
+      "container": 25565,
+      "defaultHost": 25565,
+      "description": "Players connect here"
+    }
+  ],
+  "variables": [
+    {
+      "key": "eula",
+      "label": "Accept the Minecraft EULA",
+      "description": "Required by Mojang to run a server: https://aka.ms/MinecraftEULA",
+      "type": "boolean",
+      "required": true,
+      "group": "General"
+    },
+    {
+      "key": "server_type",
+      "label": "Server type",
+      "description": "Paper runs Bukkit/Spigot plugins; Fabric and Forge run mods.",
+      "type": "select",
+      "default": "PAPER",
+      "options": [
+        { "label": "Vanilla", "value": "VANILLA" },
+        { "label": "Paper", "value": "PAPER" },
+        { "label": "Fabric", "value": "FABRIC" },
+        { "label": "Forge", "value": "FORGE" }
+      ],
+      "group": "General"
+    },
+    {
+      "key": "mc_version",
+      "label": "Minecraft version",
+      "description": "LATEST, SNAPSHOT, or a release such as 1.21.4. Must match the Java version below.",
+      "type": "string",
+      "default": "LATEST",
+      "pattern": "^(LATEST|SNAPSHOT|[0-9]+\\.[0-9]+(\\.[0-9]+)?(-(pre|rc)[0-9]+)?|[0-9]{2}w[0-9]{2}[a-z])$",
+      "maxLength": 32,
+      "group": "General"
+    },
+    {
+      "key": "java_tag",
+      "label": "Java version",
+      "description": "Java 25 for current releases, 21 for 1.20.5–1.21.x, 17 for 1.17–1.20.4, 8 for 1.16.5 and older (and old Forge).",
+      "type": "select",
+      "default": "java25",
+      "options": [
+        { "label": "Java 25", "value": "java25" },
+        { "label": "Java 21", "value": "java21" },
+        { "label": "Java 17", "value": "java17" },
+        { "label": "Java 8", "value": "java8" }
+      ],
+      "group": "General"
+    },
+    {
+      "key": "max_players",
+      "label": "Max players",
+      "type": "number",
+      "default": 20,
+      "min": 1,
+      "max": 100,
+      "group": "Gameplay"
+    },
+    {
+      "key": "motd",
+      "label": "Message of the day",
+      "description": "Shown under the server name in the multiplayer list.",
+      "type": "string",
+      "default": "A Minecraft server on DeployKit",
+      "maxLength": 59,
+      "group": "Gameplay"
+    },
+    {
+      "key": "difficulty",
+      "label": "Difficulty",
+      "type": "select",
+      "default": "normal",
+      "options": [
+        { "label": "Peaceful", "value": "peaceful" },
+        { "label": "Easy", "value": "easy" },
+        { "label": "Normal", "value": "normal" },
+        { "label": "Hard", "value": "hard" }
+      ],
+      "group": "Gameplay"
+    },
+    {
+      "key": "online_mode",
+      "label": "Online mode",
+      "description": "Verify players against Mojang accounts. Turn off only for offline/LAN play.",
+      "type": "boolean",
+      "default": true,
+      "group": "Network"
+    },
+    {
+      "key": "seed",
+      "label": "World seed",
+      "description": "Leave blank for a random world. Only used when the world is first generated.",
+      "type": "string",
+      "editable": false,
+      "maxLength": 64,
+      "group": "World"
+    },
+    {
+      "key": "rcon_password",
+      "label": "RCON password",
+      "description": "Used by the DeployKit console. Generated when left blank.",
+      "type": "string",
+      "secret": true,
+      "generator": "${password:24}",
+      "maxLength": 128,
+      "group": "Network"
+    }
+  ],
+  "env": {
+    "EULA": "${eula}",
+    "TYPE": "${server_type}",
+    "VERSION": "${mc_version}",
+    "MAX_PLAYERS": "${max_players}",
+    "MOTD": "${motd}",
+    "DIFFICULTY": "${difficulty}",
+    "ONLINE_MODE": "${online_mode}",
+    "SEED": "${seed}",
+    "MEMORY": "",
+    "INIT_MEMORY": "${dk_heap_mb}M",
+    "MAX_MEMORY": "${dk_heap_mb}M",
+    "ENABLE_RCON": "true",
+    "RCON_PORT": "25575",
+    "RCON_PASSWORD": "${rcon_password}"
+  },
+  "volumes": [
+    {
+      "name": "data",
+      "path": "/data",
+      "primary": true,
+      "backup": { "include": ["."] }
+    }
+  ],
+  "console": {
+    "method": "rcon",
+    "protocol": "minecraft",
+    "port": 25575,
+    "passwordVar": "rcon_password"
+  },
+  "stop": { "timeoutSec": 60 },
+  "readyPattern": "Done \\(",
+  "backup": {
+    "preCommands": ["save-off", "save-all flush"],
+    "postCommands": ["save-on"],
+    "settleSeconds": 5
+  },
+  "configFiles": [
+    { "volume": "data", "path": "server.properties", "label": "server.properties", "language": "properties" },
+    { "volume": "data", "path": "ops.json", "label": "Operators", "language": "json" },
+    { "volume": "data", "path": "whitelist.json", "label": "Whitelist", "language": "json" }
+  ],
+  "resources": {
+    "memoryMb": { "min": 1536, "recommended": 4096 }
+  },
+  "notes": "Runs on [itzg/minecraft-server](https://docker-minecraft-server.readthedocs.io). The first start downloads the server jar, so it takes a minute or two.\n\n- **Plugins** (Paper) go in `plugins/`, **mods** (Fabric/Forge) in `mods/` — upload them from the Files tab and restart.\n- The settings on this page (MOTD, difficulty, max players, online mode…) are written into `server.properties` **on every start**, so change them here rather than in the file. Other properties you edit in the file are kept.\n- The JVM heap is capped at 75% of the memory limit; give the server more memory to raise it.\n- The Java version must match the Minecraft version: current releases need Java 25."
+}

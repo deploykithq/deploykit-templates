@@ -74,6 +74,31 @@ after writing a `.env` with the keys your `env` block declares.
 
 Say in the pull request what you tested it on.
 
+## Add a game server
+
+1. Create `games/<id>/game.json`, starting with
+   `"$schema": "../../schema/game.schema.json"`. The id must match the
+   directory. See the [README](README.md#game-servers) for the fields and the
+   `${dk_*}` built-ins.
+2. Read the image's documentation and use its real env var names and value
+   formats. Pin a tag when the image publishes meaningful ones.
+3. Every password is a `secret` variable, typed in or derived from a
+   `generator`. Never a default.
+4. Back up the world, not the game: point `backup.include` of the primary
+   volume at the save directory, and set `backup: false` on a volume that only
+   holds downloaded server files.
+5. Pick the console the server really has (`rcon`, `stdin` or `none`). With
+   `none` there can be no `backup.preCommands` and no `stop.command`; give the
+   server a `stop.timeoutSec` long enough to save on SIGTERM instead.
+6. Add a `logo.svg` and run `npm test`.
+
+On top of the JSON Schema, the validator repeats DeployKit's cross-checks:
+every `${x}` in `image` / `env` / `command` is a declared variable or built-in
+(and helpers appear only in `generator`), port names and container/protocol
+pairs are unique, `offsetOf` names a non-offset port, exactly one volume is
+primary, `configFiles` sit on declared volumes, an RCON `passwordVar` is a
+secret variable, and `games/index.json` is up to date.
+
 ## Updating an existing blueprint
 
 Bump `version` to the upstream version you tested. Installs pick up the change

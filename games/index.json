@@ -1,0 +1,89 @@
+[
+  {
+    "id": "cs2",
+    "name": "Counter-Strike 2",
+    "version": "1",
+    "description": "Counter-Strike 2 dedicated server with RCON console. Competitive, casual, wingman or deathmatch.",
+    "logo": "logo.svg",
+    "links": {
+      "github": "https://github.com/joedwards32/CS2",
+      "docs": "https://developer.valvesoftware.com/wiki/Counter-Strike_2/Dedicated_Servers"
+    },
+    "tags": [
+      "cs2",
+      "fps",
+      "steam",
+      "source2"
+    ],
+    "category": "fps",
+    "players": {
+      "min": 2,
+      "max": 64
+    }
+  },
+  {
+    "id": "minecraft-java",
+    "name": "Minecraft: Java Edition",
+    "version": "1",
+    "description": "Minecraft Java server — Vanilla, Paper, Fabric or Forge — with RCON console, world backups and editable server.properties.",
+    "logo": "logo.svg",
+    "links": {
+      "github": "https://github.com/itzg/docker-minecraft-server",
+      "docs": "https://docker-minecraft-server.readthedocs.io"
+    },
+    "tags": [
+      "minecraft",
+      "sandbox",
+      "java"
+    ],
+    "category": "sandbox",
+    "players": {
+      "min": 1,
+      "max": 100
+    }
+  },
+  {
+    "id": "terraria",
+    "name": "Terraria",
+    "version": "1",
+    "description": "Vanilla Terraria dedicated server. Creates the world on first start and saves it cleanly on stop.",
+    "logo": "logo.svg",
+    "links": {
+      "github": "https://github.com/ryansheehan/terraria",
+      "docs": "https://terraria.wiki.gg/wiki/Server"
+    },
+    "tags": [
+      "terraria",
+      "sandbox",
+      "2d",
+      "co-op"
+    ],
+    "category": "sandbox",
+    "players": {
+      "min": 1,
+      "max": 255
+    }
+  },
+  {
+    "id": "valheim",
+    "name": "Valheim",
+    "version": "1",
+    "description": "Valheim dedicated server for co-op Viking survival, with automatic updates and world backups.",
+    "logo": "logo.svg",
+    "links": {
+      "github": "https://github.com/community-valheim-tools/valheim-server-docker",
+      "docs": "https://github.com/community-valheim-tools/valheim-server-docker#readme"
+    },
+    "tags": [
+      "valheim",
+      "survival",
+      "co-op",
+      "steam"
+    ],
+    "category": "survival",
+    "players": {
+      "min": 1,
+      "max": 10
+    }
+  }
+]

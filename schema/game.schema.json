@@ -1,0 +1,584 @@
+{
+  "$id": "https://raw.githubusercontent.com/deploykithq/deploykit-templates/master/schema/game.schema.json",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Editor hint. Ignored by DeployKit."
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 50
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "logo": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "links": {
+      "type": "object",
+      "properties": {
+        "github": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500
+        },
+        "website": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500
+        },
+        "docs": {
+          "type": "string",
+          "format": "uri",
+          "maxLength": 500
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 30
+      },
+      "maxItems": 10,
+      "default": []
+    },
+    "category": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30
+    },
+    "players": {
+      "type": "object",
+      "properties": {
+        "min": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "additionalProperties": false
+    },
+    "image": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "command": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "maxLength": 1000
+      },
+      "maxItems": 50
+    },
+    "ports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          },
+          "protocol": {
+            "type": "string",
+            "enum": [
+              "tcp",
+              "udp"
+            ]
+          },
+          "container": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "defaultHost": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+          },
+          "matchHost": {
+            "type": "boolean",
+            "default": false
+          },
+          "env": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$",
+            "maxLength": 256
+          },
+          "offsetOf": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": -100,
+            "maximum": 100
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "name",
+          "protocol",
+          "container"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 10
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "number",
+              "boolean",
+              "select"
+            ]
+          },
+          "default": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "required": {
+            "type": "boolean",
+            "default": false
+          },
+          "editable": {
+            "type": "boolean",
+            "default": true
+          },
+          "secret": {
+            "type": "boolean",
+            "default": false
+          },
+          "generator": {
+            "type": "string",
+            "pattern": "^\\$\\{(password|base64|hash|uuid|randomPort|username|timestamp)(?::\\d+)?\\}$"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "value": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              "required": [
+                "label",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 50
+          },
+          "min": {
+            "type": "number"
+          },
+          "max": {
+            "type": "number"
+          },
+          "pattern": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "maxLength": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2000,
+            "default": 500
+          },
+          "group": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 50,
+      "default": []
+    },
+    "env": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 10000
+      },
+      "propertyNames": {
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+      },
+      "default": {}
+    },
+    "volumes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^\\/[A-Za-z0-9._\\-/]*$"
+          },
+          "primary": {
+            "type": "boolean",
+            "default": false
+          },
+          "browsable": {
+            "type": "boolean",
+            "default": true
+          },
+          "backup": {
+            "anyOf": [
+              {
+                "type": "boolean",
+                "const": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "include": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^(\\.|[A-Za-z0-9._][A-Za-z0-9._\\-/]*)$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 20,
+                    "default": [
+                      "."
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              }
+            ],
+            "default": {
+              "include": [
+                "."
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 4
+    },
+    "console": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "const": "rcon"
+            },
+            "protocol": {
+              "type": "string",
+              "enum": [
+                "source",
+                "minecraft"
+              ]
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 65535
+            },
+            "passwordVar": {
+              "type": "string",
+              "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+            }
+          },
+          "required": [
+            "method",
+            "protocol",
+            "port",
+            "passwordVar"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "const": "stdin"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
+              "const": "none"
+            }
+          },
+          "required": [
+            "method"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "default": {
+        "method": "none"
+      }
+    },
+    "stop": {
+      "type": "object",
+      "properties": {
+        "signal": {
+          "type": "string",
+          "pattern": "^SIG[A-Z0-9]+$"
+        },
+        "timeoutSec": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 600,
+          "default": 30
+        },
+        "command": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "readyPattern": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "backup": {
+      "type": "object",
+      "properties": {
+        "preCommands": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "maxItems": 10,
+          "default": []
+        },
+        "postCommands": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "maxItems": 10,
+          "default": []
+        },
+        "settleSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60,
+          "default": 0
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "configFiles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "volume": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^(?!.*\\.\\.)[A-Za-z0-9._][A-Za-z0-9._\\-/]*$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "language": {
+            "type": "string",
+            "enum": [
+              "properties",
+              "yaml",
+              "json",
+              "ini",
+              "text"
+            ],
+            "default": "text"
+          }
+        },
+        "required": [
+          "volume",
+          "path",
+          "label"
+        ],
+        "additionalProperties": false
+      },
+      "maxItems": 20,
+      "default": []
+    },
+    "resources": {
+      "type": "object",
+      "properties": {
+        "memoryMb": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "type": "integer",
+              "minimum": 128,
+              "maximum": 65536
+            },
+            "recommended": {
+              "type": "integer",
+              "minimum": 128,
+              "maximum": 65536
+            }
+          },
+          "required": [
+            "min",
+            "recommended"
+          ],
+          "additionalProperties": false
+        },
+        "cpuMillicores": {
+          "type": "object",
+          "properties": {
+            "recommended": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 64000
+            }
+          },
+          "required": [
+            "recommended"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "memoryMb"
+      ],
+      "additionalProperties": false,
+      "default": {
+        "memoryMb": {
+          "min": 512,
+          "recommended": 2048
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "maxLength": 2000
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "version",
+    "description",
+    "image",
+    "ports",
+    "volumes"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DeployKit game server",
+  "description": "A game server definition: image, ports, user-configurable variables, volumes, console and backup behaviour. Never contains a secret — it declares how one is derived."
+}

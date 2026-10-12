@@ -1,0 +1,144 @@
+{
+  "$schema": "../../schema/game.schema.json",
+  "id": "cs2",
+  "name": "Counter-Strike 2",
+  "version": "1",
+  "description": "Counter-Strike 2 dedicated server with RCON console. Competitive, casual, wingman or deathmatch.",
+  "logo": "logo.svg",
+  "links": {
+    "github": "https://github.com/joedwards32/CS2",
+    "docs": "https://developer.valvesoftware.com/wiki/Counter-Strike_2/Dedicated_Servers"
+  },
+  "tags": ["cs2", "fps", "steam", "source2"],
+  "category": "fps",
+  "players": { "min": 2, "max": 64 },
+  "image": "joedwards32/cs2:5.0.0",
+  "ports": [
+    {
+      "name": "game",
+      "protocol": "udp",
+      "container": 27015,
+      "defaultHost": 27015,
+      "matchHost": true,
+      "env": "CS2_PORT",
+      "description": "Game traffic; players connect to host:port"
+    },
+    {
+      "name": "rcon",
+      "protocol": "tcp",
+      "container": 27015,
+      "matchHost": true,
+      "offsetOf": "game",
+      "offset": 0,
+      "description": "TCP on the same number as the game port (remote RCON tools)"
+    }
+  ],
+  "variables": [
+    {
+      "key": "server_name",
+      "label": "Server name",
+      "description": "Shown in the server browser. No quotes, slashes, $, & or backticks.",
+      "type": "string",
+      "default": "DeployKit CS2",
+      "pattern": "^[^/\\\\&\"'`$]{1,63}$",
+      "maxLength": 63,
+      "group": "General"
+    },
+    {
+      "key": "game_mode",
+      "label": "Game mode",
+      "type": "select",
+      "default": "competitive",
+      "options": [
+        { "label": "Competitive", "value": "competitive" },
+        { "label": "Casual", "value": "casual" },
+        { "label": "Wingman", "value": "wingman" },
+        { "label": "Deathmatch", "value": "deathmatch" }
+      ],
+      "group": "Gameplay"
+    },
+    {
+      "key": "map",
+      "label": "Start map",
+      "type": "string",
+      "default": "de_dust2",
+      "pattern": "^[A-Za-z0-9_]{1,64}$",
+      "maxLength": 64,
+      "group": "Gameplay"
+    },
+    {
+      "key": "max_players",
+      "label": "Max players",
+      "type": "number",
+      "default": 10,
+      "min": 2,
+      "max": 64,
+      "group": "Gameplay"
+    },
+    {
+      "key": "gslt",
+      "label": "Game Server Login Token",
+      "description": "From https://steamcommunity.com/dev/managegameservers (app 730). Without one the server is reachable on LAN only.",
+      "type": "string",
+      "secret": true,
+      "pattern": "^[A-Fa-f0-9]{32}$",
+      "maxLength": 32,
+      "group": "Network"
+    },
+    {
+      "key": "server_password",
+      "label": "Join password",
+      "description": "Leave blank for a public server. Letters, digits, - and _.",
+      "type": "string",
+      "secret": true,
+      "pattern": "^[A-Za-z0-9_-]{1,64}$",
+      "maxLength": 64,
+      "group": "Network"
+    },
+    {
+      "key": "rcon_password",
+      "label": "RCON password",
+      "description": "Used by the DeployKit console. Generated when left blank.",
+      "type": "string",
+      "secret": true,
+      "generator": "${password:24}",
+      "pattern": "^[A-Za-z0-9_-]{8,128}$",
+      "maxLength": 128,
+      "group": "Network"
+    }
+  ],
+  "env": {
+    "CS2_SERVERNAME": "${server_name}",
+    "CS2_GAMEALIAS": "${game_mode}",
+    "CS2_STARTMAP": "${map}",
+    "CS2_MAXPLAYERS": "${max_players}",
+    "SRCDS_TOKEN": "${gslt}",
+    "CS2_PW": "${server_password}",
+    "CS2_RCONPW": "${rcon_password}",
+    "CS2_RCON_PORT": "27050",
+    "CS2_LAN": "0"
+  },
+  "volumes": [
+    {
+      "name": "server",
+      "path": "/home/steam/cs2-dedicated",
+      "primary": true,
+      "backup": { "include": ["game/csgo/cfg"] }
+    }
+  ],
+  "console": {
+    "method": "rcon",
+    "protocol": "source",
+    "port": 27050,
+    "passwordVar": "rcon_password"
+  },
+  "stop": { "timeoutSec": 30 },
+  "configFiles": [
+    { "volume": "server", "path": "game/csgo/cfg/gamemode_competitive.cfg", "label": "Competitive mode settings", "language": "text" },
+    { "volume": "server", "path": "game/csgo/cfg/gamemode_casual.cfg", "label": "Casual mode settings", "language": "text" }
+  ],
+  "resources": {
+    "memoryMb": { "min": 2048, "recommended": 4096 }
+  },
+  "notes": "Runs on [joedwards32/cs2](https://github.com/joedwards32/CS2).\n\n- **The first start downloads about 60 GB** from Steam and can take a long time; make sure the host has the disk space. The game updates itself on every restart.\n- **Internet play needs a Game Server Login Token** (Steam app 730). Without one the server only accepts LAN connections.\n- `server.cfg` is regenerated from these settings on every start — put your own cvars in the `gamemode_*.cfg` files instead.\n- Backups cover `game/csgo/cfg` only, never the game files.\n- The DeployKit console reaches RCON through a proxy on container port 27050, so it keeps working whatever host port you pick."
+}

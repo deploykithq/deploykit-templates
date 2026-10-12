@@ -262,14 +262,233 @@ if (!existsSync(indexPath)) {
   }
 }
 
+// A game definition (`games/<id>/game.json`) is checked against
+// schema/game.schema.json, then against the cross-field rules of DeployKit's
+// `gameSpecSchema` superRefine, which JSON Schema cannot express. Mirrored, not
+// imported, for the same reason as HELPERS above.
+
+const gamesDir = path.join(root, "games");
+const gameSchemaPath = path.join(root, "schema", "game.schema.json");
+
+/** `${dk_port_<name>}` is added per declared port. */
+const GAME_BUILTINS = new Set(["dk_server_name", "dk_memory_mb", "dk_heap_mb"]);
+
+const gameIds = existsSync(gamesDir)
+  ? readdirSync(gamesDir, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .sort()
+  : [];
+const gameMetas = [];
+
+const isValidRegex = (source) => {
+  try {
+    new RegExp(source);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+if (gameIds.length > 0) {
+  const validateGame = ajv.compile(JSON.parse(readFileSync(gameSchemaPath, "utf8")));
+
+  for (const id of gameIds) {
+    const where = `games/${id}`;
+    const dir = path.join(gamesDir, id);
+    const specPath = path.join(dir, "game.json");
+
+    if (!existsSync(specPath)) {
+      fail(where, "missing game.json");
+      continue;
+    }
+
+    let spec;
+    try {
+      spec = JSON.parse(readFileSync(specPath, "utf8"));
+    } catch (err) {
+      fail(where, `game.json is not valid JSON — ${err.message}`);
+      continue;
+    }
+
+    if (!validateGame(spec)) {
+      for (const e of validateGame.errors ?? []) {
+        fail(where, `game.json${e.instancePath} ${e.message}`);
+      }
+      continue;
+    }
+
+    if (spec.id !== id) {
+      fail(where, `declares id "${spec.id}" but lives in games/${id}`);
+      continue;
+    }
+
+    if (spec.logo) {
+      const logoPath = path.join(dir, spec.logo);
+      if (!existsSync(logoPath)) fail(where, `declares logo "${spec.logo}" but it is missing`);
+      else if (statSync(logoPath).size > 100_000) warn(where, "logo is over 100 KB");
+    }
+
+    // The schema's defaults, which Ajv does not apply.
+    const variables = spec.variables ?? [];
+    const ports = spec.ports;
+    const volumes = spec.volumes;
+    const env = spec.env ?? {};
+    const consoleMethod = spec.console?.method ?? "none";
+    const backup = spec.backup ?? {};
+    const stop = spec.stop ?? {};
+
+    // Variables.
+    const varKeys = new Set();
+    for (const v of variables) {
+      const at = `variables.${v.key}`;
+      if (varKeys.has(v.key)) fail(where, `duplicate variable "${v.key}"`);
+      if (v.key.startsWith("dk_")) fail(where, `${at}: the "dk_" prefix is reserved`);
+      varKeys.add(v.key);
+
+      if (v.type === "select") {
+        if (!v.options) fail(where, `${at}: a select needs options`);
+        else if (v.default !== undefined && !v.options.some((o) => o.value === String(v.default))) {
+          fail(where, `${at}: default is not one of the options`);
+        }
+      } else if (v.options) {
+        fail(where, `${at}: only a select may declare options`);
+      }
+      if (v.generator && v.type !== "string") fail(where, `${at}: only a string may have a generator`);
+      if (v.default !== undefined) {
+        const expected = v.type === "select" ? "string" : v.type;
+        if (typeof v.default !== expected) fail(where, `${at}: default must be a ${expected}`);
+      }
+      if (v.pattern && !isValidRegex(v.pattern)) fail(where, `${at}: pattern is not a valid regex`);
+      if (v.min !== undefined && v.max !== undefined && v.min > v.max) {
+        fail(where, `${at}: min is greater than max`);
+      }
+      // A definition never contains a secret: it is typed in or generated.
+      if (v.secret && v.default !== undefined && v.default !== "") {
+        fail(where, `${at}: a secret variable cannot ship a default; use a generator`);
+      }
+    }
+
+    // Ports.
+    const portNames = new Set();
+    const portPairs = new Set();
+    for (const p of ports) {
+      if (portNames.has(p.name)) fail(where, `duplicate port "${p.name}"`);
+      portNames.add(p.name);
+      const pair = `${p.container}/${p.protocol}`;
+      if (portPairs.has(pair)) fail(where, `duplicate port ${pair}`);
+      portPairs.add(pair);
+    }
+    for (const p of ports) {
+      if ((p.offsetOf === undefined) !== (p.offset === undefined)) {
+        fail(where, `ports.${p.name}: offsetOf and offset go together`);
+      }
+      if (p.offsetOf !== undefined) {
+        const base = ports.find((q) => q.name === p.offsetOf);
+        if (!base || base.name === p.name) {
+          fail(where, `ports.${p.name}: offsetOf names unknown port "${p.offsetOf}"`);
+        } else if (base.offsetOf !== undefined) {
+          fail(where, `ports.${p.name}: an offset port cannot follow another offset port`);
+        }
+      }
+    }
+
+    // `${name}` references in image, env and command.
+    const known = new Set([
+      ...varKeys,
+      ...GAME_BUILTINS,
+      ...[...portNames].map((n) => `dk_port_${n}`),
+    ]);
+    const substituted = [
+      ["image", spec.image],
+      ...Object.entries(env).map(([k, v]) => [`env.${k}`, v]),
+      ...(spec.command ?? []).map((c, i) => [`command[${i}]`, c]),
+    ];
+    for (const [at, value] of substituted) {
+      for (const { name, arg } of placeholdersIn(String(value))) {
+        if (arg !== undefined) {
+          fail(where, `${at}: \${${name}:${arg}} — helpers belong in a variable's "generator"`);
+        } else if (!known.has(name)) {
+          fail(where, `${at} references \${${name}}, which is not a declared variable or built-in`);
+        }
+      }
+    }
+
+    // Volumes.
+    const volumeNames = new Set();
+    for (const v of volumes) {
+      if (volumeNames.has(v.name)) fail(where, `duplicate volume "${v.name}"`);
+      volumeNames.add(v.name);
+    }
+    if (volumes.filter((v) => v.primary === true).length !== 1) {
+      fail(where, "exactly one volume must be primary");
+    }
+    for (const f of spec.configFiles ?? []) {
+      if (!volumeNames.has(f.volume)) {
+        fail(where, `configFiles "${f.path}" is on unknown volume "${f.volume}"`);
+      }
+    }
+
+    // Console.
+    if (consoleMethod === "rcon") {
+      const pw = variables.find((v) => v.key === spec.console.passwordVar);
+      if (!pw) fail(where, `console.passwordVar "${spec.console.passwordVar}" is not a declared variable`);
+      else if (!pw.secret) fail(where, "console.passwordVar must be a secret variable");
+    }
+    const needsConsole =
+      (backup.preCommands ?? []).length > 0 ||
+      (backup.postCommands ?? []).length > 0 ||
+      stop.command !== undefined;
+    if (needsConsole && consoleMethod === "none") {
+      fail(where, "backup commands and stop.command need a console");
+    }
+
+    const memory = spec.resources?.memoryMb;
+    if (memory && memory.min > memory.recommended) {
+      fail(where, "resources.memoryMb.min is greater than recommended");
+    }
+    if (spec.readyPattern && !isValidRegex(spec.readyPattern)) {
+      fail(where, "readyPattern is not a valid regex");
+    }
+
+    if (/change[-_]?me/i.test(JSON.stringify(spec))) {
+      fail(where, "ships a placeholder credential; use a generator such as ${password:24}");
+    }
+
+    gameMetas.push({
+      id: spec.id,
+      name: spec.name,
+      version: spec.version,
+      description: spec.description,
+      ...(spec.logo ? { logo: spec.logo } : {}),
+      links: spec.links ?? {},
+      tags: spec.tags ?? [],
+      ...(spec.category ? { category: spec.category } : {}),
+      ...(spec.players ? { players: { min: spec.players.min, max: spec.players.max } } : {}),
+    });
+  }
+
+  const gamesIndexPath = path.join(gamesDir, "index.json");
+  if (!existsSync(gamesIndexPath)) {
+    problems.push("games/index.json is missing — run `npm run index`");
+  } else {
+    const expected = JSON.stringify(gameMetas, null, 2) + "\n";
+    if (readFileSync(gamesIndexPath, "utf8") !== expected) {
+      problems.push("games/index.json is out of date — run `npm run index` and commit the result");
+    }
+  }
+}
+
+const summary = `${ids.length} blueprint(s) and ${gameIds.length} game(s)`;
+
 for (const w of warnings) console.warn(`  warning  ${w}`);
 
 if (problems.length > 0) {
   for (const p of problems) console.error(`  error    ${p}`);
-  console.error(`\n${problems.length} problem(s) across ${ids.length} blueprint(s).`);
+  console.error(`\n${problems.length} problem(s) across ${summary}.`);
   process.exit(1);
 }
 
 console.log(
-  `${ids.length} blueprint(s) valid${warnings.length ? `, ${warnings.length} warning(s)` : ""}.`,
+  `${summary} valid${warnings.length ? `, ${warnings.length} warning(s)` : ""}.`,
 );
