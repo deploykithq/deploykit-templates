@@ -1,0 +1,147 @@
+{
+  "$schema": "../../../schema/game.schema.json",
+  "id": "terraria-tmodloader",
+  "name": "Terraria (tModLoader)",
+  "version": "1",
+  "description": "Modded Terraria with tModLoader. Add mods from the Steam Workshop in one click; worlds are saved cleanly on stop.",
+  "logo": "logo.svg",
+  "links": {
+    "github": "https://github.com/JACOBSMILE/tmodloader1.4",
+    "docs": "https://github.com/tModLoader/tModLoader/wiki"
+  },
+  "tags": ["terraria", "tmodloader", "mods", "sandbox", "co-op"],
+  "category": "sandbox",
+  "players": { "min": 1, "max": 255 },
+  "image": "jacobsmile/tmodloader1.4:v2026.09.2.1",
+  "ports": [
+    {
+      "name": "game",
+      "protocol": "tcp",
+      "container": 7777,
+      "defaultHost": 7777,
+      "description": "Players connect here"
+    }
+  ],
+  "variables": [
+    {
+      "key": "world_name",
+      "label": "World name",
+      "description": "Letters, digits, - and _. Created on first start if it does not exist.",
+      "type": "string",
+      "default": "World",
+      "editable": false,
+      "pattern": "^[A-Za-z0-9_-]{1,40}$",
+      "maxLength": 40,
+      "group": "World"
+    },
+    {
+      "key": "world_size",
+      "label": "World size",
+      "description": "Only used when the world is first created.",
+      "type": "select",
+      "default": "2",
+      "editable": false,
+      "options": [
+        { "label": "Small", "value": "1" },
+        { "label": "Medium", "value": "2" },
+        { "label": "Large", "value": "3" }
+      ],
+      "group": "World"
+    },
+    {
+      "key": "difficulty",
+      "label": "Difficulty",
+      "description": "Only used when the world is first created.",
+      "type": "select",
+      "default": "0",
+      "editable": false,
+      "options": [
+        { "label": "Classic", "value": "0" },
+        { "label": "Expert", "value": "1" },
+        { "label": "Master", "value": "2" },
+        { "label": "Journey", "value": "3" }
+      ],
+      "group": "World"
+    },
+    {
+      "key": "seed",
+      "label": "World seed",
+      "description": "Leave blank for a random world. Only used when the world is first created.",
+      "type": "string",
+      "editable": false,
+      "maxLength": 64,
+      "group": "World"
+    },
+    {
+      "key": "max_players",
+      "label": "Max players",
+      "type": "number",
+      "default": 8,
+      "min": 1,
+      "max": 255,
+      "group": "Gameplay"
+    },
+    {
+      "key": "motd",
+      "label": "Message of the day",
+      "type": "string",
+      "default": "A tModLoader server on DeployKit",
+      "maxLength": 100,
+      "group": "Gameplay"
+    },
+    {
+      "key": "password",
+      "label": "Server password",
+      "description": "Leave blank for no password.",
+      "type": "string",
+      "secret": true,
+      "maxLength": 64,
+      "group": "Network"
+    }
+  ],
+  "env": {
+    "TMOD_WORLDNAME": "${world_name}",
+    "TMOD_WORLDSIZE": "${world_size}",
+    "TMOD_DIFFICULTY": "${difficulty}",
+    "TMOD_WORLDSEED": "${seed}",
+    "TMOD_MAXPLAYERS": "${max_players}",
+    "TMOD_MOTD": "${motd}",
+    "TMOD_PASS": "${password}",
+    "TMOD_PORT": "7777",
+    "TMOD_AUTOSAVE_INTERVAL": "10",
+    "TMOD_SHUTDOWN_MESSAGE": "The server is restarting"
+  },
+  "volumes": [
+    {
+      "name": "data",
+      "path": "/data",
+      "primary": true,
+      "backup": { "include": ["tModLoader/Worlds", "tModLoader/ModConfigs"] }
+    }
+  ],
+  "console": { "method": "exec", "command": ["inject"] },
+  "stop": { "timeoutSec": 60 },
+  "readyPattern": "Server started",
+  "backup": {
+    "preCommands": ["save"],
+    "settleSeconds": 5
+  },
+  "configFiles": [
+    { "volume": "data", "path": "tModLoader/Mods/enabled.json", "label": "Enabled mods", "language": "json" }
+  ],
+  "resources": {
+    "memoryMb": { "min": 2048, "recommended": 4096 }
+  },
+  "mods": {
+    "sources": [
+      {
+        "source": "steam-workshop",
+        "appId": 1281930,
+        "env": "TMOD_AUTODOWNLOAD",
+        "enabledEnv": "TMOD_ENABLEDMODS"
+      }
+    ],
+    "directories": [{ "volume": "data", "path": "tModLoader/Mods" }]
+  },
+  "notes": "Runs [tModLoader](https://github.com/tModLoader/tModLoader) via [JACOBSMILE/tmodloader1.4](https://github.com/JACOBSMILE/tmodloader1.4).\n\n- Add mods from the **Mods** tab: paste a Steam Workshop link, or search once an admin adds a Steam Web API key in Settings. Workshop items always download their latest upload when the server restarts.\n- Players need the same mods; tModLoader offers to download them when they join.\n- Disabling a mod a world depends on can break that world, so DeployKit takes a safety backup first.\n- World name, size, difficulty and seed only apply when the world is created.\n- Stopping the server saves the world first."
+}

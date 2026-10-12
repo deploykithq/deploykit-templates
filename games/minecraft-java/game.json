@@ -2,8 +2,8 @@
   "$schema": "../../schema/game.schema.json",
   "id": "minecraft-java",
   "name": "Minecraft: Java Edition",
-  "version": "1",
-  "description": "Minecraft Java server — Vanilla, Paper, Fabric or Forge — with RCON console, world backups and editable server.properties.",
+  "version": "2",
+  "description": "Minecraft Java server — Vanilla, Paper, Fabric or Forge — with one-click mods, plugins and modpacks from Modrinth and CurseForge, RCON console and world backups.",
   "logo": "logo.svg",
   "links": {
     "github": "https://github.com/itzg/docker-minecraft-server",
@@ -173,5 +173,44 @@
   "resources": {
     "memoryMb": { "min": 1536, "recommended": 4096 }
   },
-  "notes": "Runs on [itzg/minecraft-server](https://docker-minecraft-server.readthedocs.io). The first start downloads the server jar, so it takes a minute or two.\n\n- **Plugins** (Paper) go in `plugins/`, **mods** (Fabric/Forge) in `mods/` — upload them from the Files tab and restart.\n- The settings on this page (MOTD, difficulty, max players, online mode…) are written into `server.properties` **on every start**, so change them here rather than in the file. Other properties you edit in the file are kept.\n- The JVM heap is capped at 75% of the memory limit; give the server more memory to raise it.\n- The Java version must match the Minecraft version: current releases need Java 25."
+  "mods": {
+    "sources": [
+      { "source": "modrinth", "env": "MODRINTH_PROJECTS" },
+      { "source": "curseforge", "env": "CURSEFORGE_FILES", "apiKeyEnv": "CF_API_KEY" }
+    ],
+    "loader": {
+      "from": "server_type",
+      "map": {
+        "FABRIC": { "loaders": ["fabric"], "kind": "mod" },
+        "FORGE": { "loaders": ["forge"], "kind": "mod" },
+        "PAPER": { "loaders": ["paper", "bukkit", "spigot"], "kind": "plugin" }
+      }
+    },
+    "gameVersion": { "from": "mc_version", "aliases": { "LATEST": "release", "SNAPSHOT": "any" } },
+    "modpacks": [
+      {
+        "source": "modrinth",
+        "env": {
+          "TYPE": "MODRINTH",
+          "MODRINTH_MODPACK": "${dk_modpack_project}",
+          "MODRINTH_VERSION": "${dk_modpack_version}",
+          "VERSION": "${dk_modpack_game_version}"
+        }
+      },
+      {
+        "source": "curseforge",
+        "env": {
+          "TYPE": "AUTO_CURSEFORGE",
+          "CF_SLUG": "${dk_modpack_slug}",
+          "CF_FILE_ID": "${dk_modpack_version}",
+          "VERSION": "${dk_modpack_game_version}"
+        }
+      }
+    ],
+    "directories": [
+      { "volume": "data", "path": "mods" },
+      { "volume": "data", "path": "plugins" }
+    ]
+  },
+  "notes": "Runs on [itzg/minecraft-server](https://docker-minecraft-server.readthedocs.io). The first start downloads the server jar, so it takes a minute or two.\n\n- Install **mods** (Fabric/Forge) and **plugins** (Paper) from the **Mods** tab, or start the server from a Modrinth or CurseForge **modpack**. Jars uploaded by hand to `mods/` or `plugins/` from the Files tab still work.\n- The settings on this page (MOTD, difficulty, max players, online mode…) are written into `server.properties` **on every start**, so change them here rather than in the file. Other properties you edit in the file are kept.\n- The JVM heap is capped at 75% of the memory limit; give the server more memory to raise it.\n- The Java version must match the Minecraft version — also a modpack's: current releases need Java 25."
 }

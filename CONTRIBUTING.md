@@ -87,17 +87,30 @@ Say in the pull request what you tested it on.
 4. Back up the world, not the game: point `backup.include` of the primary
    volume at the save directory, and set `backup: false` on a volume that only
    holds downloaded server files.
-5. Pick the console the server really has (`rcon`, `stdin` or `none`). With
-   `none` there can be no `backup.preCommands` and no `stop.command`; give the
-   server a `stop.timeoutSec` long enough to save on SIGTERM instead.
-6. Add a `logo.svg` and run `npm test`.
+5. Pick the console the server really has (`rcon`, `stdin`, `exec` or `none`).
+   `exec` runs the image's own injector with the command as one argument
+   (`{ "method": "exec", "command": ["inject"] }`). With `none` there can be
+   no `backup.preCommands` and no `stop.command`; give the server a
+   `stop.timeoutSec` long enough to save on SIGTERM instead.
+6. If the image installs mods from a list, declare a `mods` block: each
+   `sources[]` entry names the catalogue (`modrinth`, `curseforge`,
+   `steam-workshop` with its `appId`) and the env var the image reads the
+   comma-separated list from (`enabledEnv` for the Workshop's enabled subset,
+   `apiKeyEnv` for the CurseForge key). `loader` maps a select variable's
+   options to catalogue loaders, `gameVersion` names the version variable,
+   and `modpacks[].env` may use only the `${dk_modpack_*}` built-ins. DeployKit
+   keeps the list; the image must download what is listed and delete what
+   leaves it.
+7. Add a `logo.svg` and run `npm test`.
 
 On top of the JSON Schema, the validator repeats DeployKit's cross-checks:
 every `${x}` in `image` / `env` / `command` is a declared variable or built-in
 (and helpers appear only in `generator`), port names and container/protocol
 pairs are unique, `offsetOf` names a non-offset port, exactly one volume is
 primary, `configFiles` sit on declared volumes, an RCON `passwordVar` is a
-secret variable, and `games/index.json` is up to date.
+secret variable, the `mods` block is consistent (unique sources, env vars that
+do not clash with `env`, loader/version variables that exist, modpack sources
+that are declared), and `games/index.json` is up to date.
 
 ## Updating an existing blueprint
 

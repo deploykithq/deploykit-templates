@@ -24,8 +24,8 @@
   {
     "id": "minecraft-java",
     "name": "Minecraft: Java Edition",
-    "version": "1",
-    "description": "Minecraft Java server — Vanilla, Paper, Fabric or Forge — with RCON console, world backups and editable server.properties.",
+    "version": "2",
+    "description": "Minecraft Java server — Vanilla, Paper, Fabric or Forge — with one-click mods, plugins and modpacks from Modrinth and CurseForge, RCON console and world backups.",
     "logo": "logo.svg",
     "links": {
       "github": "https://github.com/itzg/docker-minecraft-server",

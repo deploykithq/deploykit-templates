@@ -272,6 +272,14 @@ const gameSchemaPath = path.join(root, "schema", "game.schema.json");
 
 /** `${dk_port_<name>}` is added per declared port. */
 const GAME_BUILTINS = new Set(["dk_server_name", "dk_memory_mb", "dk_heap_mb"]);
+// Only these are available inside mods.modpacks[].env.
+const MODPACK_BUILTINS = [
+  "dk_modpack_project",
+  "dk_modpack_slug",
+  "dk_modpack_version",
+  "dk_modpack_game_version",
+  "dk_modpack_loader",
+];
 
 const gameIds = existsSync(gamesDir)
   ? readdirSync(gamesDir, { withFileTypes: true })
@@ -441,6 +449,64 @@ if (gameIds.length > 0) {
       stop.command !== undefined;
     if (needsConsole && consoleMethod === "none") {
       fail(where, "backup commands and stop.command need a console");
+    }
+
+    // Mods.
+    if (spec.mods) {
+      const mods = spec.mods;
+      const sources = new Set();
+      const modEnv = new Set();
+      for (const s of mods.sources ?? []) {
+        if (sources.has(s.source)) fail(where, `mods: duplicate source "${s.source}"`);
+        sources.add(s.source);
+        const steam = s.source === "steam-workshop";
+        if (steam && s.appId === undefined) fail(where, "mods: steam-workshop needs appId");
+        if (!steam && (s.appId !== undefined || s.enabledEnv !== undefined)) {
+          fail(where, `mods: appId and enabledEnv are for steam-workshop only (${s.source})`);
+        }
+        if (s.apiKeyEnv !== undefined && s.source !== "curseforge") {
+          fail(where, `mods: apiKeyEnv is for curseforge only (${s.source})`);
+        }
+        for (const name of [s.env, s.enabledEnv, s.apiKeyEnv].filter(Boolean)) {
+          if (name in env) fail(where, `mods: ${name} is already set in env`);
+          if (modEnv.has(name)) fail(where, `mods: ${name} is used twice`);
+          modEnv.add(name);
+        }
+      }
+      if (mods.loader) {
+        const select = variables.find((v) => v.key === mods.loader.from);
+        if (!select || select.type !== "select") {
+          fail(where, "mods.loader.from must be a select variable");
+        } else {
+          for (const value of Object.keys(mods.loader.map ?? {})) {
+            if (!select.options.some((o) => o.value === value)) {
+              fail(where, `mods.loader.map: "${value}" is not an option of ${select.key}`);
+            }
+          }
+        }
+      }
+      if (mods.gameVersion && !varKeys.has(mods.gameVersion.from)) {
+        fail(where, "mods.gameVersion.from is not a declared variable");
+      }
+      const packSources = new Set();
+      for (const p of mods.modpacks ?? []) {
+        if (!sources.has(p.source)) fail(where, `mods.modpacks: "${p.source}" is not in sources`);
+        if (p.source === "steam-workshop") fail(where, "mods.modpacks: the Workshop has no modpacks");
+        if (packSources.has(p.source)) fail(where, `mods.modpacks: duplicate source "${p.source}"`);
+        packSources.add(p.source);
+        for (const [k, v] of Object.entries(p.env ?? {})) {
+          for (const { name, arg } of placeholdersIn(String(v))) {
+            if (arg !== undefined || !MODPACK_BUILTINS.includes(name)) {
+              fail(where, `mods.modpacks.${p.source}.env.${k}: only \${dk_modpack_*} is available here`);
+            }
+          }
+        }
+      }
+      for (const d of mods.directories ?? []) {
+        if (!volumeNames.has(d.volume)) {
+          fail(where, `mods.directories "${d.path}" is on unknown volume "${d.volume}"`);
+        }
+      }
     }
 
     const memory = spec.resources?.memoryMb;

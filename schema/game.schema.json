@@ -400,6 +400,30 @@
           "properties": {
             "method": {
               "type": "string",
+              "const": "exec"
+            },
+            "command": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "minItems": 1,
+              "maxItems": 5
+            }
+          },
+          "required": [
+            "method",
+            "command"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "method": {
+              "type": "string",
               "const": "none"
             }
           },
@@ -566,6 +590,193 @@
     "notes": {
       "type": "string",
       "maxLength": 2000
+    },
+    "mods": {
+      "type": "object",
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "enum": [
+                  "modrinth",
+                  "curseforge",
+                  "steam-workshop"
+                ]
+              },
+              "env": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+              },
+              "enabledEnv": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+              },
+              "apiKeyEnv": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256,
+                "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+              },
+              "appId": {
+                "type": "integer",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "source",
+              "env"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "loader": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+            },
+            "map": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "loaders": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9-]{1,30}$"
+                    },
+                    "minItems": 1,
+                    "maxItems": 5
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "mod",
+                      "plugin"
+                    ]
+                  }
+                },
+                "required": [
+                  "loaders",
+                  "kind"
+                ],
+                "additionalProperties": false
+              },
+              "propertyNames": {
+                "maxLength": 200
+              }
+            }
+          },
+          "required": [
+            "from",
+            "map"
+          ],
+          "additionalProperties": false
+        },
+        "gameVersion": {
+          "type": "object",
+          "properties": {
+            "from": {
+              "type": "string",
+              "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+            },
+            "aliases": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "enum": [
+                  "release",
+                  "any"
+                ]
+              },
+              "propertyNames": {
+                "maxLength": 32
+              },
+              "default": {}
+            }
+          },
+          "required": [
+            "from"
+          ],
+          "additionalProperties": false
+        },
+        "modpacks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": {
+                "type": "string",
+                "enum": [
+                  "modrinth",
+                  "curseforge",
+                  "steam-workshop"
+                ]
+              },
+              "env": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string",
+                  "maxLength": 1000
+                },
+                "propertyNames": {
+                  "minLength": 1,
+                  "maxLength": 256,
+                  "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+                }
+              }
+            },
+            "required": [
+              "source",
+              "env"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 3,
+          "default": []
+        },
+        "directories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "volume": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,31}$"
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 255,
+                "pattern": "^(?!.*\\.\\.)[A-Za-z0-9._][A-Za-z0-9._\\-/]*$"
+              }
+            },
+            "required": [
+              "volume",
+              "path"
+            ],
+            "additionalProperties": false
+          },
+          "maxItems": 5,
+          "default": []
+        }
+      },
+      "required": [
+        "sources"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [
