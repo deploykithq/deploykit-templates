@@ -2,17 +2,18 @@
   "$schema": "../../schema/game.schema.json",
   "id": "minecraft-java",
   "name": "Minecraft: Java Edition",
-  "version": "2",
-  "description": "Minecraft Java server — Vanilla, Paper, Fabric or Forge — with one-click mods, plugins and modpacks from Modrinth and CurseForge, RCON console and world backups.",
+  "version": "3",
+  "description": "Minecraft Java server — Vanilla, Paper, Fabric, Forge or NeoForge — with one-click mods, plugins and modpacks from Modrinth and CurseForge, a live console and world backups.",
   "logo": "logo.svg",
   "links": {
-    "github": "https://github.com/itzg/docker-minecraft-server",
-    "docs": "https://docker-minecraft-server.readthedocs.io"
+    "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/minecraft-java",
+    "docs": "https://minecraft.wiki/w/Server.properties"
   },
   "tags": ["minecraft", "sandbox", "java"],
   "category": "sandbox",
   "players": { "min": 1, "max": 100 },
-  "image": "itzg/minecraft-server:${java_tag}",
+  "contract": 1,
+  "image": "ghcr.io/deploykithq/game-minecraft-java:0.1-${java_tag}",
   "ports": [
     {
       "name": "game",
@@ -32,16 +33,17 @@
       "group": "General"
     },
     {
-      "key": "server_type",
+      "key": "type",
       "label": "Server type",
-      "description": "Paper runs Bukkit/Spigot plugins; Fabric and Forge run mods.",
+      "description": "Paper runs Bukkit/Spigot plugins; Fabric, Forge and NeoForge run mods.",
       "type": "select",
-      "default": "PAPER",
+      "default": "paper",
       "options": [
-        { "label": "Vanilla", "value": "VANILLA" },
-        { "label": "Paper", "value": "PAPER" },
-        { "label": "Fabric", "value": "FABRIC" },
-        { "label": "Forge", "value": "FORGE" }
+        { "label": "Vanilla", "value": "vanilla" },
+        { "label": "Paper", "value": "paper" },
+        { "label": "Fabric", "value": "fabric" },
+        { "label": "Forge", "value": "forge" },
+        { "label": "NeoForge", "value": "neoforge" }
       ],
       "group": "General"
     },
@@ -53,6 +55,15 @@
       "default": "LATEST",
       "pattern": "^(LATEST|SNAPSHOT|[0-9]+\\.[0-9]+(\\.[0-9]+)?(-(pre|rc)[0-9]+)?|[0-9]{2}w[0-9]{2}[a-z])$",
       "maxLength": 32,
+      "group": "General"
+    },
+    {
+      "key": "loader_version",
+      "label": "Loader version",
+      "description": "Paper build, Fabric loader, Forge or NeoForge version. Leave blank for the newest stable one.",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9._+-]{1,64}$",
+      "maxLength": 64,
       "group": "General"
     },
     {
@@ -118,31 +129,17 @@
       "group": "World"
     },
     {
-      "key": "rcon_password",
-      "label": "RCON password",
-      "description": "Used by the DeployKit console. Generated when left blank.",
+      "key": "jvm_opts",
+      "label": "Extra JVM flags",
+      "description": "Space-separated, e.g. -XX:+UseZGC. The heap is already sized from the memory limit.",
       "type": "string",
-      "secret": true,
-      "generator": "${password:24}",
-      "maxLength": 128,
-      "group": "Network"
+      "pattern": "^(-[A-Za-z0-9:+=._/-]+( +|$))*$",
+      "maxLength": 500,
+      "group": "Advanced"
     }
   ],
   "env": {
-    "EULA": "${eula}",
-    "TYPE": "${server_type}",
-    "VERSION": "${mc_version}",
-    "MAX_PLAYERS": "${max_players}",
-    "MOTD": "${motd}",
-    "DIFFICULTY": "${difficulty}",
-    "ONLINE_MODE": "${online_mode}",
-    "SEED": "${seed}",
-    "MEMORY": "",
-    "INIT_MEMORY": "${dk_heap_mb}M",
-    "MAX_MEMORY": "${dk_heap_mb}M",
-    "ENABLE_RCON": "true",
-    "RCON_PORT": "25575",
-    "RCON_PASSWORD": "${rcon_password}"
+    "DK_GAME_VERSION": "${mc_version}"
   },
   "volumes": [
     {
@@ -152,17 +149,12 @@
       "backup": { "include": ["."] }
     }
   ],
-  "console": {
-    "method": "rcon",
-    "protocol": "minecraft",
-    "port": 25575,
-    "passwordVar": "rcon_password"
-  },
-  "stop": { "timeoutSec": 60 },
-  "readyPattern": "Done \\(",
+  "console": { "method": "stdin" },
+  "stop": { "timeoutSec": 65 },
+  "readyPattern": "\\[deploykit\\] ready",
   "backup": {
-    "preCommands": ["save-off", "save-all flush"],
-    "postCommands": ["save-on"],
+    "preCommands": ["/dk save-off", "/dk save"],
+    "postCommands": ["/dk save-on"],
     "settleSeconds": 5
   },
   "configFiles": [
@@ -175,15 +167,16 @@
   },
   "mods": {
     "sources": [
-      { "source": "modrinth", "env": "MODRINTH_PROJECTS" },
-      { "source": "curseforge", "env": "CURSEFORGE_FILES", "apiKeyEnv": "CF_API_KEY" }
+      { "source": "modrinth", "env": "DK_MODS_MODRINTH" },
+      { "source": "curseforge", "env": "DK_MODS_CURSEFORGE", "apiKeyEnv": "DK_CURSEFORGE_API_KEY" }
     ],
     "loader": {
-      "from": "server_type",
+      "from": "type",
       "map": {
-        "FABRIC": { "loaders": ["fabric"], "kind": "mod" },
-        "FORGE": { "loaders": ["forge"], "kind": "mod" },
-        "PAPER": { "loaders": ["paper", "bukkit", "spigot"], "kind": "plugin" }
+        "fabric": { "loaders": ["fabric"], "kind": "mod" },
+        "forge": { "loaders": ["forge"], "kind": "mod" },
+        "neoforge": { "loaders": ["neoforge"], "kind": "mod" },
+        "paper": { "loaders": ["paper", "bukkit", "spigot"], "kind": "plugin" }
       }
     },
     "gameVersion": { "from": "mc_version", "aliases": { "LATEST": "release", "SNAPSHOT": "any" } },
@@ -191,19 +184,17 @@
       {
         "source": "modrinth",
         "env": {
-          "TYPE": "MODRINTH",
-          "MODRINTH_MODPACK": "${dk_modpack_project}",
-          "MODRINTH_VERSION": "${dk_modpack_version}",
-          "VERSION": "${dk_modpack_game_version}"
+          "DK_MODPACK_SOURCE": "modrinth",
+          "DK_MODPACK_PROJECT": "${dk_modpack_project}",
+          "DK_MODPACK_VERSION": "${dk_modpack_version}"
         }
       },
       {
         "source": "curseforge",
         "env": {
-          "TYPE": "AUTO_CURSEFORGE",
-          "CF_SLUG": "${dk_modpack_slug}",
-          "CF_FILE_ID": "${dk_modpack_version}",
-          "VERSION": "${dk_modpack_game_version}"
+          "DK_MODPACK_SOURCE": "curseforge",
+          "DK_MODPACK_PROJECT": "${dk_modpack_project}",
+          "DK_MODPACK_VERSION": "${dk_modpack_version}"
         }
       }
     ],
@@ -212,5 +203,5 @@
       { "volume": "data", "path": "plugins" }
     ]
   },
-  "notes": "Runs on [itzg/minecraft-server](https://docker-minecraft-server.readthedocs.io). The first start downloads the server jar, so it takes a minute or two.\n\n- Install **mods** (Fabric/Forge) and **plugins** (Paper) from the **Mods** tab, or start the server from a Modrinth or CurseForge **modpack**. Jars uploaded by hand to `mods/` or `plugins/` from the Files tab still work.\n- The settings on this page (MOTD, difficulty, max players, online mode…) are written into `server.properties` **on every start**, so change them here rather than in the file. Other properties you edit in the file are kept.\n- The JVM heap is capped at 75% of the memory limit; give the server more memory to raise it.\n- The Java version must match the Minecraft version — also a modpack's: current releases need Java 25."
+  "notes": "Runs on the [DeployKit Minecraft image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/minecraft-java), which downloads the server from Mojang, PaperMC, Fabric, Forge or NeoForge on the first start — so that one takes a minute or two.\n\n- Install **mods** (Fabric/Forge/NeoForge) and **plugins** (Paper) from the **Mods** tab, or start the server from a Modrinth or CurseForge **modpack**, which then decides the Minecraft version and the loader. Required dependencies are installed with each mod. Jars uploaded by hand to `mods/` or `plugins/` are never touched.\n- The settings on this page (MOTD, difficulty, max players, online mode…) are written into `server.properties` **on every start**, so change them here rather than in the file. Other properties you edit in the file are kept.\n- The JVM heap is 75% of the memory limit; give the server more memory to raise it.\n- The Java version must match the Minecraft version — also a modpack's. If it does not, the log says which one the server needs."
 }

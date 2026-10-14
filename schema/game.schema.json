@@ -86,6 +86,10 @@
       ],
       "additionalProperties": false
     },
+    "contract": {
+      "type": "number",
+      "const": 1
+    },
     "image": {
       "type": "string",
       "minLength": 1,

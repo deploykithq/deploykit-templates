@@ -80,8 +80,13 @@ Say in the pull request what you tested it on.
    `"$schema": "../../schema/game.schema.json"`. The id must match the
    directory. See the [README](README.md#game-servers) for the fields and the
    `${dk_*}` built-ins.
-2. Read the image's documentation and use its real env var names and value
-   formats. Pin a tag when the image publishes meaningful ones.
+2. Prefer an image from
+   [`deploykit-game-images`](https://github.com/deploykithq/deploykit-game-images)
+   and declare `"contract": 1` (see the [README](README.md#contract-images)):
+   its variables then reach the image as `DK_VAR_<KEY>`, and steps 5 and 6
+   below reduce to what the contract fixes. For any other image, read its
+   documentation and use its real env var names and value formats. Pin a
+   tag when the image publishes meaningful ones.
 3. Every password is a `secret` variable, typed in or derived from a
    `generator`. Never a default.
 4. Back up the world, not the game: point `backup.include` of the primary
@@ -89,7 +94,9 @@ Say in the pull request what you tested it on.
    holds downloaded server files.
 5. Pick the console the server really has (`rcon`, `stdin`, `exec` or `none`).
    `exec` runs the image's own injector with the command as one argument
-   (`{ "method": "exec", "command": ["inject"] }`). With `none` there can be
+   (`{ "method": "exec", "command": ["inject"] }`), under the image's
+   `timeout` (coreutils or BusyBox — every Debian, Ubuntu and Alpine image
+   has it). With `none` there can be
    no `backup.preCommands` and no `stop.command`; give the server a
    `stop.timeoutSec` long enough to save on SIGTERM instead.
 6. If the image installs mods from a list, declare a `mods` block: each

@@ -2,31 +2,18 @@
   "$schema": "../../schema/game.schema.json",
   "id": "terraria",
   "name": "Terraria",
-  "version": "1",
+  "version": "2",
   "description": "Vanilla Terraria dedicated server. Creates the world on first start and saves it cleanly on stop.",
   "logo": "logo.svg",
   "links": {
-    "github": "https://github.com/ryansheehan/terraria",
+    "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/terraria",
     "docs": "https://terraria.wiki.gg/wiki/Server"
   },
   "tags": ["terraria", "sandbox", "2d", "co-op"],
   "category": "sandbox",
   "players": { "min": 1, "max": 255 },
-  "image": "ryshe/terraria:vanilla-1.4.5.8",
-  "command": [
-    "-world",
-    "/root/.local/share/Terraria/Worlds/${world_name}.wld",
-    "-autocreate",
-    "${world_size}",
-    "-worldname",
-    "${world_name}",
-    "-maxplayers",
-    "${max_players}",
-    "-password",
-    "${password}",
-    "-port",
-    "7777"
-  ],
+  "contract": 1,
+  "image": "ghcr.io/deploykithq/game-terraria:0.1",
   "ports": [
     {
       "name": "game",
@@ -37,6 +24,16 @@
     }
   ],
   "variables": [
+    {
+      "key": "version",
+      "label": "Terraria version",
+      "description": "The dedicated server release, such as 1.4.5.8. Players need the same version.",
+      "type": "string",
+      "default": "1.4.5.8",
+      "pattern": "^1\\.[0-9]\\.[0-9]\\.[0-9]{1,2}$",
+      "maxLength": 16,
+      "group": "General"
+    },
     {
       "key": "world_name",
       "label": "World name",
@@ -63,12 +60,43 @@
       "group": "World"
     },
     {
+      "key": "difficulty",
+      "label": "Difficulty",
+      "description": "Only used when the world is first created.",
+      "type": "select",
+      "default": "0",
+      "editable": false,
+      "options": [
+        { "label": "Classic", "value": "0" },
+        { "label": "Expert", "value": "1" },
+        { "label": "Master", "value": "2" },
+        { "label": "Journey", "value": "3" }
+      ],
+      "group": "World"
+    },
+    {
+      "key": "seed",
+      "label": "World seed",
+      "description": "Leave blank for a random world. Only used when the world is first created.",
+      "type": "string",
+      "editable": false,
+      "maxLength": 64,
+      "group": "World"
+    },
+    {
       "key": "max_players",
       "label": "Max players",
       "type": "number",
       "default": 8,
       "min": 1,
       "max": 255,
+      "group": "Gameplay"
+    },
+    {
+      "key": "motd",
+      "label": "Message of the day",
+      "type": "string",
+      "maxLength": 100,
       "group": "Gameplay"
     },
     {
@@ -81,31 +109,35 @@
       "group": "Network"
     }
   ],
+  "env": {
+    "DK_GAME_VERSION": "${version}"
+  },
   "volumes": [
     {
-      "name": "worlds",
-      "path": "/root/.local/share/Terraria/Worlds",
+      "name": "data",
+      "path": "/data",
       "primary": true,
-      "backup": { "include": ["."] }
+      "backup": { "include": ["worlds", "serverconfig.txt"] }
     },
     {
-      "name": "config",
-      "path": "/config",
-      "backup": { "include": ["."] }
+      "name": "server",
+      "path": "/server",
+      "browsable": false,
+      "backup": false
     }
   ],
   "console": { "method": "stdin" },
-  "stop": { "timeoutSec": 60, "command": "exit" },
-  "readyPattern": "Server started",
+  "stop": { "timeoutSec": 60 },
+  "readyPattern": "\\[deploykit\\] ready",
   "backup": {
-    "preCommands": ["save"],
+    "preCommands": ["/dk save"],
     "settleSeconds": 5
   },
   "configFiles": [
-    { "volume": "config", "path": "serverconfig.txt", "label": "serverconfig.txt", "language": "properties" }
+    { "volume": "data", "path": "serverconfig.txt", "label": "serverconfig.txt", "language": "properties" }
   ],
   "resources": {
     "memoryMb": { "min": 1024, "recommended": 2048 }
   },
-  "notes": "Runs the official dedicated server via [ryshe/terraria](https://github.com/ryansheehan/terraria) (vanilla build, no TShock).\n\n- The world is generated on the first start; a large world takes a few minutes.\n- Difficulty (classic, expert, master, journey) is not a command-line option. It only applies when a world is generated: stop the server, set `difficulty=` (0 classic, 1 expert, 2 master, 3 journey) in `serverconfig.txt`, delete the `.wld` file from the worlds volume and start it again.\n- The console accepts the server's own commands: `save`, `playing`, `kick <name>`, `say <message>`… Stopping the server sends `exit`, which saves the world first.\n- Max players and the password set here override `serverconfig.txt`."
+  "notes": "Runs the official dedicated server from terraria.org on the [DeployKit Terraria image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/terraria) (vanilla, no TShock).\n\n- The world is generated on the first start; a large world takes a few minutes. Worlds live in `worlds/`.\n- World name, size, difficulty and seed only apply when the world is created.\n- The settings on this page are written into `serverconfig.txt` on every start; other keys you add to the file are kept.\n- The console takes the server's own commands: `save`, `playing`, `kick <name>`, `say <message>`… Stopping the server sends `exit`, which saves the world first."
 }

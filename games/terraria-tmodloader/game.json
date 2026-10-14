@@ -1,18 +1,19 @@
 {
-  "$schema": "../../../schema/game.schema.json",
+  "$schema": "../../schema/game.schema.json",
   "id": "terraria-tmodloader",
   "name": "Terraria (tModLoader)",
-  "version": "1",
+  "version": "2",
   "description": "Modded Terraria with tModLoader. Add mods from the Steam Workshop in one click; worlds are saved cleanly on stop.",
   "logo": "logo.svg",
   "links": {
-    "github": "https://github.com/JACOBSMILE/tmodloader1.4",
+    "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/tmodloader",
     "docs": "https://github.com/tModLoader/tModLoader/wiki"
   },
   "tags": ["terraria", "tmodloader", "mods", "sandbox", "co-op"],
   "category": "sandbox",
   "players": { "min": 1, "max": 255 },
-  "image": "jacobsmile/tmodloader1.4:v2026.09.2.1",
+  "contract": 1,
+  "image": "ghcr.io/deploykithq/game-tmodloader:0.1",
   "ports": [
     {
       "name": "game",
@@ -23,6 +24,16 @@
     }
   ],
   "variables": [
+    {
+      "key": "tml_version",
+      "label": "tModLoader version",
+      "description": "latest, or a release tag such as v2026.08.3.0. Players need the same version; Steam keeps theirs on the latest one.",
+      "type": "string",
+      "default": "latest",
+      "pattern": "^(latest|v[0-9]{4}\\.[0-9]{2}\\.[0-9]+\\.[0-9]+)$",
+      "maxLength": 32,
+      "group": "General"
+    },
     {
       "key": "world_name",
       "label": "World name",
@@ -100,33 +111,31 @@
     }
   ],
   "env": {
-    "TMOD_WORLDNAME": "${world_name}",
-    "TMOD_WORLDSIZE": "${world_size}",
-    "TMOD_DIFFICULTY": "${difficulty}",
-    "TMOD_WORLDSEED": "${seed}",
-    "TMOD_MAXPLAYERS": "${max_players}",
-    "TMOD_MOTD": "${motd}",
-    "TMOD_PASS": "${password}",
-    "TMOD_PORT": "7777",
-    "TMOD_AUTOSAVE_INTERVAL": "10",
-    "TMOD_SHUTDOWN_MESSAGE": "The server is restarting"
+    "DK_GAME_VERSION": "${tml_version}"
   },
   "volumes": [
     {
       "name": "data",
       "path": "/data",
       "primary": true,
-      "backup": { "include": ["tModLoader/Worlds", "tModLoader/ModConfigs"] }
+      "backup": { "include": ["tModLoader/Worlds", "tModLoader/ModConfigs", "serverconfig.txt"] }
+    },
+    {
+      "name": "server",
+      "path": "/server",
+      "browsable": false,
+      "backup": false
     }
   ],
-  "console": { "method": "exec", "command": ["inject"] },
-  "stop": { "timeoutSec": 60 },
-  "readyPattern": "Server started",
+  "console": { "method": "stdin" },
+  "stop": { "timeoutSec": 65 },
+  "readyPattern": "\\[deploykit\\] ready",
   "backup": {
-    "preCommands": ["save"],
+    "preCommands": ["/dk save"],
     "settleSeconds": 5
   },
   "configFiles": [
+    { "volume": "data", "path": "serverconfig.txt", "label": "serverconfig.txt", "language": "properties" },
     { "volume": "data", "path": "tModLoader/Mods/enabled.json", "label": "Enabled mods", "language": "json" }
   ],
   "resources": {
@@ -137,11 +146,11 @@
       {
         "source": "steam-workshop",
         "appId": 1281930,
-        "env": "TMOD_AUTODOWNLOAD",
-        "enabledEnv": "TMOD_ENABLEDMODS"
+        "env": "DK_MODS_STEAM",
+        "enabledEnv": "DK_MODS_STEAM_ENABLED"
       }
     ],
     "directories": [{ "volume": "data", "path": "tModLoader/Mods" }]
   },
-  "notes": "Runs [tModLoader](https://github.com/tModLoader/tModLoader) via [JACOBSMILE/tmodloader1.4](https://github.com/JACOBSMILE/tmodloader1.4).\n\n- Add mods from the **Mods** tab: paste a Steam Workshop link, or search once an admin adds a Steam Web API key in Settings. Workshop items always download their latest upload when the server restarts.\n- Players need the same mods; tModLoader offers to download them when they join.\n- Disabling a mod a world depends on can break that world, so DeployKit takes a safety backup first.\n- World name, size, difficulty and seed only apply when the world is created.\n- Stopping the server saves the world first."
+  "notes": "Runs [tModLoader](https://github.com/tModLoader/tModLoader) on the [DeployKit tModLoader image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/tmodloader), which downloads the release from GitHub on the first start.\n\n- Add mods from the **Mods** tab: paste a Steam Workshop link, or search once an admin adds a Steam Web API key in Settings. Workshop items download their latest upload when the server restarts.\n- A `.tmod` uploaded by hand to `tModLoader/Mods` stays enabled.\n- Players need the same mods; tModLoader offers to download them when they join.\n- Disabling a mod a world depends on can break that world, so DeployKit takes a safety backup first.\n- World name, size, difficulty and seed only apply when the world is created.\n- Stopping the server sends `exit`, which saves the world first."
 }

@@ -2,17 +2,18 @@
   "$schema": "../../schema/game.schema.json",
   "id": "valheim",
   "name": "Valheim",
-  "version": "1",
+  "version": "2",
   "description": "Valheim dedicated server for co-op Viking survival, with automatic updates and world backups.",
   "logo": "logo.svg",
   "links": {
-    "github": "https://github.com/community-valheim-tools/valheim-server-docker",
-    "docs": "https://github.com/community-valheim-tools/valheim-server-docker#readme"
+    "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/valheim",
+    "docs": "https://valheim.fandom.com/wiki/Dedicated_servers"
   },
   "tags": ["valheim", "survival", "co-op", "steam"],
   "category": "survival",
   "players": { "min": 1, "max": 10 },
-  "image": "ghcr.io/community-valheim-tools/valheim-server:latest",
+  "contract": 1,
+  "image": "ghcr.io/deploykithq/game-valheim:0.1",
   "ports": [
     {
       "name": "game",
@@ -20,7 +21,6 @@
       "container": 2456,
       "defaultHost": 2456,
       "matchHost": true,
-      "env": "SERVER_PORT",
       "description": "Game port; players join with host:port"
     },
     {
@@ -71,32 +71,43 @@
       "type": "boolean",
       "default": true,
       "group": "Network"
+    },
+    {
+      "key": "skip_update",
+      "label": "Skip the update on start",
+      "description": "Start faster with the installed server instead of checking Steam for an update.",
+      "type": "boolean",
+      "default": false,
+      "group": "Advanced"
+    },
+    {
+      "key": "validate",
+      "label": "Verify game files on start",
+      "description": "Have SteamCMD check every installed file. Slow; turn it on to repair a broken install.",
+      "type": "boolean",
+      "default": false,
+      "group": "Advanced"
     }
   ],
-  "env": {
-    "SERVER_NAME": "${server_name}",
-    "WORLD_NAME": "${world_name}",
-    "SERVER_PASS": "${server_pass}",
-    "SERVER_PUBLIC": "${server_public}"
-  },
   "volumes": [
     {
-      "name": "config",
-      "path": "/config",
+      "name": "data",
+      "path": "/data",
       "primary": true,
       "backup": { "include": ["worlds_local"] }
     },
     {
       "name": "server",
-      "path": "/opt/valheim",
+      "path": "/server",
       "browsable": false,
       "backup": false
     }
   ],
-  "console": { "method": "none" },
+  "console": { "method": "stdin" },
   "stop": { "timeoutSec": 120 },
+  "readyPattern": "\\[deploykit\\] ready",
   "resources": {
     "memoryMb": { "min": 2048, "recommended": 4096 }
   },
-  "notes": "Runs on the [community valheim-server image](https://github.com/community-valheim-tools/valheim-server-docker). The first start downloads the dedicated server from Steam (~1 GB) and takes several minutes; it updates itself on restart.\n\n- Players join with **host:game-port** and the server password.\n- Worlds live in `worlds_local/` on the config volume. To bring an existing world, upload its folder there and set the world name to match before the first start.\n- The image also keeps its own zipped backups in `/config/backups`; DeployKit's world backups cover `worlds_local/` only.\n- Valheim has no remote console, so the server is stopped with a signal and given 2 minutes to save.\n- Crossplay (Xbox/Game Pass) is not enabled: it needs a third UDP port."
+  "notes": "Runs on the [DeployKit Valheim image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/valheim). The first start downloads the dedicated server from Steam (~1 GB) and takes several minutes; later starts only download updates.\n\n- Players join with **host:game-port** and the server password.\n- Worlds live in `worlds_local/`. To bring an existing world, upload its `.db` and `.fwl` files there and set the world name to match before the first start.\n- Valheim has no remote console: the console only answers `/dk status`. Stopping the server sends it SIGINT and gives it almost 2 minutes to save.\n- Crossplay (Xbox/Game Pass) is not enabled: it needs a third UDP port."
 }

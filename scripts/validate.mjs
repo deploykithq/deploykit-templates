@@ -281,6 +281,17 @@ const MODPACK_BUILTINS = [
   "dk_modpack_loader",
 ];
 
+// Mirrors the CONTRACT_* constants of DeployKit's game.schema.ts.
+const CONTRACT_READY_PATTERN = "\\[deploykit\\] ready";
+const CONTRACT_STOP_MARGIN_SEC = 10;
+const CONTRACT_ENV_ALLOWED = ["DK_GAME_VERSION"];
+const CONTRACT_MOD_ENV = {
+  modrinth: { env: "DK_MODS_MODRINTH" },
+  curseforge: { env: "DK_MODS_CURSEFORGE", apiKeyEnv: "DK_CURSEFORGE_API_KEY" },
+  "steam-workshop": { env: "DK_MODS_STEAM", enabledEnv: "DK_MODS_STEAM_ENABLED" },
+};
+const CONTRACT_MODPACK_ENV = ["DK_MODPACK_SOURCE", "DK_MODPACK_PROJECT", "DK_MODPACK_VERSION"];
+
 const gameIds = existsSync(gamesDir)
   ? readdirSync(gamesDir, { withFileTypes: true })
       .filter((e) => e.isDirectory())
@@ -505,6 +516,64 @@ if (gameIds.length > 0) {
       for (const d of mods.directories ?? []) {
         if (!volumeNames.has(d.volume)) {
           fail(where, `mods.directories "${d.path}" is on unknown volume "${d.volume}"`);
+        }
+      }
+    }
+
+    // The DeployKit game image contract: DeployKit injects the DK_* inputs and
+    // the image owns the console, readiness and the clean stop. Mirrors
+    // `checkContract` in DeployKit's game.schema.ts.
+    if (spec.contract !== undefined) {
+      const c = "contract 1";
+      for (const v of variables) {
+        if (!/^[a-z][a-z0-9_]*$/.test(v.key)) {
+          fail(where, `${c}: variable "${v.key}" must be lower case (it becomes DK_VAR_<KEY>)`);
+        }
+      }
+      if (spec.command) fail(where, `${c}: the image starts itself, no command`);
+      if (consoleMethod !== "stdin") fail(where, `${c}: console must be { "method": "stdin" }`);
+      if (stop.command !== undefined || stop.signal !== undefined) {
+        fail(where, `${c}: the image stops the game on SIGTERM, set only stop.timeoutSec`);
+      }
+      if ((stop.timeoutSec ?? 30) < CONTRACT_STOP_MARGIN_SEC + 10) {
+        fail(where, `${c}: stop.timeoutSec must be at least ${CONTRACT_STOP_MARGIN_SEC + 10}`);
+      }
+      if (spec.readyPattern !== undefined && spec.readyPattern !== CONTRACT_READY_PATTERN) {
+        fail(where, `${c}: readyPattern must be ${CONTRACT_READY_PATTERN}`);
+      }
+      for (const v of volumes) {
+        if (v.primary === true) {
+          if (v.path !== "/data") fail(where, `${c}: the primary volume is /data`);
+        } else if (v.path !== "/server") {
+          fail(where, `${c}: volume "${v.name}" — only /data and /server exist`);
+        } else if (v.backup !== false) {
+          fail(where, `${c}: /server holds re-downloadable game files, set backup false`);
+        }
+      }
+      for (const key of Object.keys(env)) {
+        if (key.startsWith("DK_") && !CONTRACT_ENV_ALLOWED.includes(key)) {
+          fail(where, `${c}: env.${key} — DeployKit sets the DK_* inputs; only ${CONTRACT_ENV_ALLOWED.join(", ")} goes in env`);
+        }
+      }
+      for (const p of ports) {
+        if (p.env !== undefined) fail(where, `${c}: port "${p.name}" is DK_PORT_${p.name.toUpperCase()}, no env`);
+      }
+      for (const s of spec.mods?.sources ?? []) {
+        const expected = CONTRACT_MOD_ENV[s.source] ?? {};
+        for (const field of ["env", "enabledEnv", "apiKeyEnv"]) {
+          if (s[field] !== expected[field]) {
+            fail(where, `${c}: mods ${s.source}.${field} must be ${expected[field] ?? "absent"}`);
+          }
+        }
+      }
+      for (const p of spec.mods?.modpacks ?? []) {
+        for (const key of Object.keys(p.env ?? {})) {
+          if (!CONTRACT_MODPACK_ENV.includes(key)) {
+            fail(where, `${c}: mods.modpacks.${p.source}.env.${key} — the image reads ${CONTRACT_MODPACK_ENV.join(", ")}`);
+          }
+        }
+        if (p.env?.DK_MODPACK_SOURCE !== p.source) {
+          fail(where, `${c}: mods.modpacks.${p.source}.env.DK_MODPACK_SOURCE must be "${p.source}"`);
         }
       }
     }
