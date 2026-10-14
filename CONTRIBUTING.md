@@ -108,7 +108,8 @@ Say in the pull request what you tested it on.
    and `modpacks[].env` may use only the `${dk_modpack_*}` built-ins. DeployKit
    keeps the list; the image must download what is listed and delete what
    leaves it.
-7. Add a `logo.svg` and run `npm test`.
+7. Add `logo.png`: the game's official icon (its Steam client icon, or
+   the publisher's favicon), 64×64 with transparency. Then run `npm test`.
 
 On top of the JSON Schema, the validator repeats DeployKit's cross-checks:
 every `${x}` in `image` / `env` / `command` is a declared variable or built-in

@@ -4,7 +4,7 @@
   "name": "Counter-Strike 2",
   "version": "2",
   "description": "Counter-Strike 2 dedicated server with a live console. Competitive, casual, wingman or deathmatch.",
-  "logo": "logo.svg",
+  "logo": "logo.png",
   "links": {
     "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/cs2",
     "docs": "https://developer.valvesoftware.com/wiki/Counter-Strike_2/Dedicated_Servers"

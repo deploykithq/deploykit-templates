@@ -121,7 +121,7 @@ The catalogue also carries game server definitions, under `games/`:
 ```
 games/minecraft-java/
 ├── game.json   image, ports, variables, volumes, console, backup behaviour
-└── logo.svg
+└── logo.png    the game's official icon, 64×64
 ```
 
 A game is one container, not a Compose stack, and it is configurable: each
@@ -235,6 +235,11 @@ Trademarks belong to their respective owners and are used here only to identify
 the software each blueprint deploys. Where simple-icons has no entry, the
 blueprint carries a DeployKit lettermark instead — a pull request replacing one
 with the project's official mark is welcome.
+
+Game logos are each game's official icon as a 64×64 PNG: the Steam client icon
+for Steam games, and minecraft.net's favicon for Minecraft. Like the blueprint
+logos, they belong to their publishers and only identify the game a definition
+runs.
 
 ## Licence
 

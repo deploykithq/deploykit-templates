@@ -4,7 +4,7 @@
     "name": "Counter-Strike 2",
     "version": "2",
     "description": "Counter-Strike 2 dedicated server with a live console. Competitive, casual, wingman or deathmatch.",
-    "logo": "logo.svg",
+    "logo": "logo.png",
     "links": {
       "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/cs2",
       "docs": "https://developer.valvesoftware.com/wiki/Counter-Strike_2/Dedicated_Servers"
@@ -26,7 +26,7 @@
     "name": "Minecraft: Java Edition",
     "version": "3",
     "description": "Minecraft Java server — Vanilla, Paper, Fabric, Forge or NeoForge — with one-click mods, plugins and modpacks from Modrinth and CurseForge, a live console and world backups.",
-    "logo": "logo.svg",
+    "logo": "logo.png",
     "links": {
       "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/minecraft-java",
       "docs": "https://minecraft.wiki/w/Server.properties"
@@ -47,7 +47,7 @@
     "name": "Terraria",
     "version": "2",
     "description": "Vanilla Terraria dedicated server. Creates the world on first start and saves it cleanly on stop.",
-    "logo": "logo.svg",
+    "logo": "logo.png",
     "links": {
       "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/terraria",
       "docs": "https://terraria.wiki.gg/wiki/Server"
@@ -69,7 +69,7 @@
     "name": "Terraria (tModLoader)",
     "version": "2",
     "description": "Modded Terraria with tModLoader. Add mods from the Steam Workshop in one click; worlds are saved cleanly on stop.",
-    "logo": "logo.svg",
+    "logo": "logo.png",
     "links": {
       "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/tmodloader",
       "docs": "https://github.com/tModLoader/tModLoader/wiki"
@@ -92,7 +92,7 @@
     "name": "Valheim",
     "version": "2",
     "description": "Valheim dedicated server for co-op Viking survival, with automatic updates and world backups.",
-    "logo": "logo.svg",
+    "logo": "logo.png",
     "links": {
       "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/valheim",
       "docs": "https://valheim.fandom.com/wiki/Dedicated_servers"
