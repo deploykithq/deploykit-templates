@@ -4,7 +4,7 @@
   "name": "Terraria",
   "version": "2",
   "description": "Vanilla Terraria dedicated server. Creates the world on first start and saves it cleanly on stop.",
-  "logo": "logo.svg",
+  "logo": "logo.png",
   "links": {
     "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/terraria",
     "docs": "https://terraria.wiki.gg/wiki/Server"

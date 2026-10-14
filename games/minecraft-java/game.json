@@ -4,7 +4,7 @@
   "name": "Minecraft: Java Edition",
   "version": "3",
   "description": "Minecraft Java server — Vanilla, Paper, Fabric, Forge or NeoForge — with one-click mods, plugins and modpacks from Modrinth and CurseForge, a live console and world backups.",
-  "logo": "logo.svg",
+  "logo": "logo.png",
   "links": {
     "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/minecraft-java",
     "docs": "https://minecraft.wiki/w/Server.properties"

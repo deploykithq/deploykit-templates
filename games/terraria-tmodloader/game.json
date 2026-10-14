@@ -4,7 +4,7 @@
   "name": "Terraria (tModLoader)",
   "version": "2",
   "description": "Modded Terraria with tModLoader. Add mods from the Steam Workshop in one click; worlds are saved cleanly on stop.",
-  "logo": "logo.svg",
+  "logo": "logo.png",
   "links": {
     "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/tmodloader",
     "docs": "https://github.com/tModLoader/tModLoader/wiki"
