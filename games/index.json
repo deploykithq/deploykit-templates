@@ -22,6 +22,29 @@
     }
   },
   {
+    "id": "eco",
+    "name": "Eco",
+    "version": "1",
+    "description": "Eco dedicated server: build a civilisation together, with laws, an economy and an ecosystem that reacts to everything players do. Automatic updates, an RCON console and world backups.",
+    "logo": "logo.png",
+    "links": {
+      "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/eco",
+      "docs": "https://wiki.play.eco/en/Setting_Up_a_Server"
+    },
+    "tags": [
+      "eco",
+      "survival",
+      "simulation",
+      "co-op",
+      "steam"
+    ],
+    "category": "survival",
+    "players": {
+      "min": 1,
+      "max": 100
+    }
+  },
+  {
     "id": "minecraft-java",
     "name": "Minecraft: Java Edition",
     "version": "3",

@@ -1,0 +1,126 @@
+{
+  "$schema": "../../schema/game.schema.json",
+  "id": "eco",
+  "name": "Eco",
+  "version": "1",
+  "description": "Eco dedicated server: build a civilisation together, with laws, an economy and an ecosystem that reacts to everything players do. Automatic updates, an RCON console and world backups.",
+  "logo": "logo.png",
+  "links": {
+    "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/eco",
+    "docs": "https://wiki.play.eco/en/Setting_Up_a_Server"
+  },
+  "tags": ["eco", "survival", "simulation", "co-op", "steam"],
+  "category": "survival",
+  "players": { "min": 1, "max": 100 },
+  "contract": 1,
+  "image": "ghcr.io/deploykithq/game-eco:0.1",
+  "ports": [
+    {
+      "name": "game",
+      "protocol": "udp",
+      "container": 3000,
+      "defaultHost": 3000,
+      "matchHost": true,
+      "description": "Game port; players join with host:port"
+    },
+    {
+      "name": "web",
+      "protocol": "tcp",
+      "container": 3001,
+      "defaultHost": 3001,
+      "matchHost": true,
+      "description": "Web server: the world map, stats and economy pages players open in-game"
+    }
+  ],
+  "variables": [
+    {
+      "key": "server_token",
+      "label": "Server token",
+      "description": "From play.eco → Account → Server Authentication → Generate Token (needs a Steam account that owns Eco). Without one the server starts in offline mode: not authenticated with Strange Cloud and not listed.",
+      "type": "string",
+      "secret": true,
+      "maxLength": 512,
+      "group": "General"
+    },
+    {
+      "key": "server_name",
+      "label": "Server name",
+      "description": "Shown in the server browser. Eco's text markup (colours, bold) is allowed.",
+      "type": "string",
+      "default": "DeployKit Eco",
+      "maxLength": 64,
+      "group": "General"
+    },
+    {
+      "key": "description",
+      "label": "Description",
+      "description": "The long description players see when they select the server.",
+      "type": "string",
+      "maxLength": 500,
+      "group": "General"
+    },
+    {
+      "key": "password",
+      "label": "Server password",
+      "description": "Leave blank for an open server. Whitelisted players never need it.",
+      "type": "string",
+      "secret": true,
+      "maxLength": 64,
+      "group": "Network"
+    },
+    {
+      "key": "public",
+      "label": "List in the server browser",
+      "description": "Needs a server token.",
+      "type": "boolean",
+      "default": false,
+      "group": "Network"
+    },
+    {
+      "key": "skip_update",
+      "label": "Skip the update on start",
+      "description": "Start faster with the installed server instead of checking Steam for an update.",
+      "type": "boolean",
+      "default": false,
+      "group": "Advanced"
+    },
+    {
+      "key": "validate",
+      "label": "Verify game files on start",
+      "description": "Have SteamCMD check every installed file. Slow; turn it on to repair a broken install.",
+      "type": "boolean",
+      "default": false,
+      "group": "Advanced"
+    }
+  ],
+  "volumes": [
+    {
+      "name": "data",
+      "path": "/data",
+      "primary": true,
+      "backup": { "include": ["Storage", "Configs", "Mods/UserCode"] }
+    },
+    {
+      "name": "server",
+      "path": "/server",
+      "browsable": false,
+      "backup": false
+    }
+  ],
+  "console": { "method": "stdin" },
+  "stop": { "timeoutSec": 90 },
+  "readyPattern": "\\[deploykit\\] ready",
+  "backup": {
+    "preCommands": ["/dk save"],
+    "settleSeconds": 5
+  },
+  "configFiles": [
+    { "volume": "data", "path": "Configs/Network.eco", "label": "Network.eco", "language": "json" },
+    { "volume": "data", "path": "Configs/Users.eco", "label": "Users.eco (admins, whitelist)", "language": "json" },
+    { "volume": "data", "path": "Configs/Difficulty.eco", "label": "Difficulty.eco", "language": "json" }
+  ],
+  "resources": {
+    "memoryMb": { "min": 4096, "recommended": 8192 }
+  },
+  "notes": "Runs on the [DeployKit Eco image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/eco). The first start downloads the server from Steam (~500 MB) and generates the world, which takes a few minutes; later starts only download updates.\n\n- **Get a server token** at [play.eco](https://play.eco/account) → Server Authentication. Without one the server runs offline: it is not authenticated with Strange Cloud and cannot be listed.\n- Players join with **host:game-port**. Publish the web port too: the in-game map and the economy and stats pages are served from it.\n- Make yourself admin in `Configs/Users.eco` (the `Admins` list takes your SLG or Steam id), then restart.\n- Every other setting lives in `Configs/*.eco`. A file you have not changed yet only exists as `*.eco.template`: copy it to `*.eco` and edit that. The name, description, password, listing and ports in `Network.eco` are rewritten from this page on every start.\n- The console sends Eco's chat commands without the slash, over RCON inside the container: `manage players`, `manage announce Hello`.\n- Backups cover `Storage/` (the world, including Eco's own backups), `Configs/` and `Mods/UserCode/`."
+}
