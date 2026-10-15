@@ -43,6 +43,30 @@
     }
   },
   {
+    "id": "project-zomboid",
+    "name": "Project Zomboid",
+    "version": "1",
+    "description": "Project Zomboid dedicated server for co-op zombie survival: Build 42 or 41, Steam Workshop mods in one click, a live console and world backups.",
+    "logo": "logo.png",
+    "links": {
+      "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/project-zomboid",
+      "docs": "https://pzwiki.net/wiki/Dedicated_server"
+    },
+    "tags": [
+      "project-zomboid",
+      "zombies",
+      "survival",
+      "co-op",
+      "steam",
+      "mods"
+    ],
+    "category": "survival",
+    "players": {
+      "min": 1,
+      "max": 32
+    }
+  },
+  {
     "id": "terraria",
     "name": "Terraria",
     "version": "2",
