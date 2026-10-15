@@ -1,0 +1,208 @@
+{
+  "$schema": "../../schema/game.schema.json",
+  "id": "project-zomboid",
+  "name": "Project Zomboid",
+  "version": "1",
+  "description": "Project Zomboid dedicated server for co-op zombie survival: Build 42 or 41, Steam Workshop mods in one click, a live console and world backups.",
+  "logo": "logo.png",
+  "links": {
+    "github": "https://github.com/deploykithq/deploykit-game-images/tree/master/images/project-zomboid",
+    "docs": "https://pzwiki.net/wiki/Dedicated_server"
+  },
+  "tags": [
+    "project-zomboid",
+    "zombies",
+    "survival",
+    "co-op",
+    "steam",
+    "mods"
+  ],
+  "category": "survival",
+  "players": {
+    "min": 1,
+    "max": 32
+  },
+  "contract": 1,
+  "image": "ghcr.io/deploykithq/game-project-zomboid:0.1",
+  "ports": [
+    {
+      "name": "game",
+      "protocol": "udp",
+      "container": 16261,
+      "defaultHost": 16261,
+      "matchHost": true,
+      "description": "Game port; players join with host:port"
+    },
+    {
+      "name": "direct",
+      "protocol": "udp",
+      "container": 16262,
+      "matchHost": true,
+      "offsetOf": "game",
+      "offset": 1,
+      "description": "Direct connection port (game port + 1)"
+    }
+  ],
+  "variables": [
+    {
+      "key": "build",
+      "label": "Game build",
+      "description": "Players need the same build. Build 41 mods do not work on Build 42.",
+      "type": "select",
+      "default": "b42",
+      "options": [
+        {
+          "label": "Build 42 (stable)",
+          "value": "b42"
+        },
+        {
+          "label": "Build 41 (legacy)",
+          "value": "b41"
+        }
+      ],
+      "group": "General"
+    },
+    {
+      "key": "server_name",
+      "label": "Server name",
+      "description": "Shown in the in-game server browser.",
+      "type": "string",
+      "default": "DeployKit Project Zomboid",
+      "maxLength": 64,
+      "group": "General"
+    },
+    {
+      "key": "max_players",
+      "label": "Max players",
+      "type": "number",
+      "default": 16,
+      "min": 1,
+      "max": 32,
+      "group": "Gameplay"
+    },
+    {
+      "key": "pvp",
+      "label": "PvP",
+      "type": "boolean",
+      "default": true,
+      "group": "Gameplay"
+    },
+    {
+      "key": "admin_password",
+      "label": "Admin password",
+      "description": "Password of the in-game user \"admin\". Only applied when the player database is first created. Generated when left blank.",
+      "type": "string",
+      "secret": true,
+      "generator": "${password:16}",
+      "pattern": "^[^\\s\"]{6,64}$",
+      "maxLength": 64,
+      "editable": false,
+      "group": "Network"
+    },
+    {
+      "key": "server_pass",
+      "label": "Server password",
+      "description": "Leave blank for an open server.",
+      "type": "string",
+      "secret": true,
+      "maxLength": 64,
+      "group": "Network"
+    },
+    {
+      "key": "public",
+      "label": "List in the server browser",
+      "type": "boolean",
+      "default": false,
+      "group": "Network"
+    },
+    {
+      "key": "skip_update",
+      "label": "Skip the update on start",
+      "description": "Start faster with the installed server instead of checking Steam for an update.",
+      "type": "boolean",
+      "default": false,
+      "group": "Advanced"
+    },
+    {
+      "key": "validate",
+      "label": "Verify game files on start",
+      "description": "Have SteamCMD check every installed file. Slow; turn it on to repair a broken install.",
+      "type": "boolean",
+      "default": false,
+      "group": "Advanced"
+    }
+  ],
+  "env": {
+    "DK_GAME_VERSION": "${build}"
+  },
+  "volumes": [
+    {
+      "name": "data",
+      "path": "/data",
+      "primary": true,
+      "backup": {
+        "include": [
+          "Zomboid/Saves",
+          "Zomboid/Server",
+          "Zomboid/db"
+        ]
+      }
+    },
+    {
+      "name": "server",
+      "path": "/server",
+      "browsable": false,
+      "backup": false
+    }
+  ],
+  "console": {
+    "method": "stdin"
+  },
+  "stop": {
+    "timeoutSec": 90
+  },
+  "readyPattern": "\\[deploykit\\] ready",
+  "backup": {
+    "preCommands": [
+      "/dk save"
+    ],
+    "settleSeconds": 10
+  },
+  "configFiles": [
+    {
+      "volume": "data",
+      "path": "Zomboid/Server/servertest.ini",
+      "label": "Server settings",
+      "language": "ini"
+    },
+    {
+      "volume": "data",
+      "path": "Zomboid/Server/servertest_SandboxVars.lua",
+      "label": "Sandbox settings",
+      "language": "text"
+    }
+  ],
+  "resources": {
+    "memoryMb": {
+      "min": 4096,
+      "recommended": 8192
+    }
+  },
+  "mods": {
+    "sources": [
+      {
+        "source": "steam-workshop",
+        "appId": 108600,
+        "env": "DK_MODS_STEAM",
+        "enabledEnv": "DK_MODS_STEAM_ENABLED"
+      }
+    ],
+    "directories": [
+      {
+        "volume": "data",
+        "path": "Zomboid/mods"
+      }
+    ]
+  },
+  "notes": "Runs on the [DeployKit Project Zomboid image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/project-zomboid). The first start downloads the dedicated server from Steam (~7 GB) and takes several minutes; later starts only download updates.\n\n- Players join with **host:game-port** and the server password. Publish both UDP ports.\n- Log in as **admin** with the admin password to manage the server in game.\n- Add mods from the **Mods** tab with a Steam Workshop link. Pick mods made for the build you run: Build 41 mods do not load on Build 42. Workshop items download their latest upload when the server restarts.\n- The save is named `servertest`, Project Zomboid's default, so a save from another host can be uploaded as is to `Zomboid/Saves/Multiplayer/servertest` (with `Zomboid/db/servertest.db` for its players). Settings live in `Zomboid/Server/servertest.ini` and `servertest_SandboxVars.lua`. The name, password, player limit, PvP, listing, ports and mod lists in the `.ini` are rewritten from this page on every start; everything else is yours.\n- The console takes the server's admin commands: `players`, `servermsg \"Hello\"`, `save`.\n- Switching the build on an existing world is not supported by the game: back it up first."
+}
