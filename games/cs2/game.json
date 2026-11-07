@@ -2,7 +2,7 @@
   "$schema": "../../schema/game.schema.json",
   "id": "cs2",
   "name": "Counter-Strike 2",
-  "version": "2",
+  "version": "3",
   "description": "Counter-Strike 2 dedicated server with a live console. Competitive, casual, wingman or deathmatch.",
   "logo": "logo.png",
   "links": {
@@ -13,7 +13,7 @@
   "category": "fps",
   "players": { "min": 2, "max": 64 },
   "contract": 1,
-  "image": "ghcr.io/deploykithq/game-cs2:0.1",
+  "image": "ghcr.io/deploykithq/game-cs2:0.2",
   "ports": [
     {
       "name": "game",

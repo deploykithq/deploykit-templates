@@ -2,7 +2,7 @@
   "$schema": "../../schema/game.schema.json",
   "id": "minecraft-java",
   "name": "Minecraft: Java Edition",
-  "version": "3",
+  "version": "4",
   "description": "Minecraft Java server — Vanilla, Paper, Fabric, Forge or NeoForge — with one-click mods, plugins and modpacks from Modrinth and CurseForge, a live console and world backups.",
   "logo": "logo.png",
   "links": {
@@ -13,7 +13,7 @@
   "category": "sandbox",
   "players": { "min": 1, "max": 100 },
   "contract": 1,
-  "image": "ghcr.io/deploykithq/game-minecraft-java:0.1-${java_tag}",
+  "image": "ghcr.io/deploykithq/game-minecraft-java:0.2-${java_tag}",
   "ports": [
     {
       "name": "game",

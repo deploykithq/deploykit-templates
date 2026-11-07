@@ -2,7 +2,7 @@
   "$schema": "../../schema/game.schema.json",
   "id": "terraria-tmodloader",
   "name": "Terraria (tModLoader)",
-  "version": "2",
+  "version": "3",
   "description": "Modded Terraria with tModLoader. Add mods from the Steam Workshop in one click; worlds are saved cleanly on stop.",
   "logo": "logo.png",
   "links": {
@@ -13,7 +13,7 @@
   "category": "sandbox",
   "players": { "min": 1, "max": 255 },
   "contract": 1,
-  "image": "ghcr.io/deploykithq/game-tmodloader:0.1",
+  "image": "ghcr.io/deploykithq/game-tmodloader:0.2",
   "ports": [
     {
       "name": "game",
