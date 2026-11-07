@@ -203,5 +203,10 @@
       { "volume": "data", "path": "plugins" }
     ]
   },
-  "notes": "Runs on the [DeployKit Minecraft image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/minecraft-java), which downloads the server from Mojang, PaperMC, Fabric, Forge or NeoForge on the first start — so that one takes a minute or two.\n\n- Install **mods** (Fabric/Forge/NeoForge) and **plugins** (Paper) from the **Mods** tab, or start the server from a Modrinth or CurseForge **modpack**, which then decides the Minecraft version and the loader. Required dependencies are installed with each mod. Jars uploaded by hand to `mods/` or `plugins/` are never touched.\n- The settings on this page (MOTD, difficulty, max players, online mode…) are written into `server.properties` **on every start**, so change them here rather than in the file. Other properties you edit in the file are kept.\n- The JVM heap is 75% of the memory limit; give the server more memory to raise it.\n- The Java version must match the Minecraft version — also a modpack's. If it does not, the log says which one the server needs."
+  "notes": "Runs on the [DeployKit Minecraft image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/minecraft-java), which downloads the server from Mojang, PaperMC, Fabric, Forge or NeoForge on the first start — so that one takes a minute or two.\n\n- Install **mods** (Fabric/Forge/NeoForge) and **plugins** (Paper) from the **Mods** tab, or start the server from a Modrinth or CurseForge **modpack**, which then decides the Minecraft version and the loader. Required dependencies are installed with each mod. Jars uploaded by hand to `mods/` or `plugins/` are never touched.\n- The settings on this page (MOTD, difficulty, max players, online mode…) are written into `server.properties` **on every start**, so change them here rather than in the file. Other properties you edit in the file are kept.\n- The JVM heap is 75% of the memory limit; give the server more memory to raise it.\n- The Java version must match the Minecraft version — also a modpack's. If it does not, the log says which one the server needs.",
+  "world": {
+    "volume": "data",
+    "paths": ["world", "world_nether", "world_the_end"],
+    "variables": ["seed"]
+  }
 }

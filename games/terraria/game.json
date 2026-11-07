@@ -139,5 +139,10 @@
   "resources": {
     "memoryMb": { "min": 1024, "recommended": 2048 }
   },
-  "notes": "Runs the official dedicated server from terraria.org on the [DeployKit Terraria image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/terraria) (vanilla, no TShock).\n\n- The world is generated on the first start; a large world takes a few minutes. Worlds live in `worlds/`.\n- World name, size, difficulty and seed only apply when the world is created.\n- The settings on this page are written into `serverconfig.txt` on every start; other keys you add to the file are kept.\n- The console takes the server's own commands: `save`, `playing`, `kick <name>`, `say <message>`… Stopping the server sends `exit`, which saves the world first."
+  "notes": "Runs the official dedicated server from terraria.org on the [DeployKit Terraria image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/terraria) (vanilla, no TShock).\n\n- The world is generated on the first start; a large world takes a few minutes. Worlds live in `worlds/`.\n- World name, size, difficulty and seed only apply when the world is created: to start over with new ones, use **Regenerate world** in Settings (mods and their configs are kept).\n- The settings on this page are written into `serverconfig.txt` on every start; other keys you add to the file are kept.\n- The console takes the server's own commands: `save`, `playing`, `kick <name>`, `say <message>`… Stopping the server sends `exit`, which saves the world first.",
+  "world": {
+    "volume": "data",
+    "paths": ["worlds"],
+    "variables": ["world_name", "world_size", "difficulty", "seed"]
+  }
 }
