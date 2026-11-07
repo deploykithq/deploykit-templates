@@ -2,7 +2,7 @@
   {
     "id": "cs2",
     "name": "Counter-Strike 2",
-    "version": "2",
+    "version": "3",
     "description": "Counter-Strike 2 dedicated server with a live console. Competitive, casual, wingman or deathmatch.",
     "logo": "logo.png",
     "links": {
@@ -24,7 +24,7 @@
   {
     "id": "eco",
     "name": "Eco",
-    "version": "1",
+    "version": "2",
     "description": "Eco dedicated server: build a civilisation together, with laws, an economy and an ecosystem that reacts to everything players do. Automatic updates, an RCON console and world backups.",
     "logo": "logo.png",
     "links": {
@@ -47,7 +47,7 @@
   {
     "id": "minecraft-java",
     "name": "Minecraft: Java Edition",
-    "version": "3",
+    "version": "4",
     "description": "Minecraft Java server — Vanilla, Paper, Fabric, Forge or NeoForge — with one-click mods, plugins and modpacks from Modrinth and CurseForge, a live console and world backups.",
     "logo": "logo.png",
     "links": {
@@ -114,7 +114,7 @@
   {
     "id": "terraria-tmodloader",
     "name": "Terraria (tModLoader)",
-    "version": "2",
+    "version": "3",
     "description": "Modded Terraria with tModLoader. Add mods from the Steam Workshop in one click; worlds are saved cleanly on stop.",
     "logo": "logo.png",
     "links": {

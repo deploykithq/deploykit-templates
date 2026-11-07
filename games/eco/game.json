@@ -2,7 +2,7 @@
   "$schema": "../../schema/game.schema.json",
   "id": "eco",
   "name": "Eco",
-  "version": "1",
+  "version": "2",
   "description": "Eco dedicated server: build a civilisation together, with laws, an economy and an ecosystem that reacts to everything players do. Automatic updates, an RCON console and world backups.",
   "logo": "logo.png",
   "links": {
@@ -13,7 +13,7 @@
   "category": "survival",
   "players": { "min": 1, "max": 100 },
   "contract": 1,
-  "image": "ghcr.io/deploykithq/game-eco:0.1",
+  "image": "ghcr.io/deploykithq/game-eco:1",
   "ports": [
     {
       "name": "game",
