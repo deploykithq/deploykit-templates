@@ -781,6 +781,40 @@
         "sources"
       ],
       "additionalProperties": false
+    },
+    "world": {
+      "type": "object",
+      "properties": {
+        "volume": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,31}$"
+        },
+        "paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255,
+            "pattern": "^(?!.*\\.\\.)[A-Za-z0-9._][A-Za-z0-9._\\-/]*$"
+          },
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "variables": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+          },
+          "maxItems": 10,
+          "default": []
+        }
+      },
+      "required": [
+        "volume",
+        "paths"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

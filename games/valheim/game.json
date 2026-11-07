@@ -109,5 +109,10 @@
   "resources": {
     "memoryMb": { "min": 2048, "recommended": 4096 }
   },
-  "notes": "Runs on the [DeployKit Valheim image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/valheim). The first start downloads the dedicated server from Steam (~1 GB) and takes several minutes; later starts only download updates.\n\n- Players join with **host:game-port** and the server password.\n- Worlds live in `worlds_local/`. To bring an existing world, upload its `.db` and `.fwl` files there and set the world name to match before the first start.\n- Valheim has no remote console: the console only answers `/dk status`. Stopping the server sends it SIGINT and gives it almost 2 minutes to save.\n- Crossplay (Xbox/Game Pass) is not enabled: it needs a third UDP port."
+  "notes": "Runs on the [DeployKit Valheim image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/valheim). The first start downloads the dedicated server from Steam (~1 GB) and takes several minutes; later starts only download updates.\n\n- Players join with **host:game-port** and the server password.\n- Worlds live in `worlds_local/`. To bring an existing world, upload its `.db` and `.fwl` files there and set the world name to match before the first start.\n- Valheim has no remote console: the console only answers `/dk status`. Stopping the server sends it SIGINT and gives it almost 2 minutes to save.\n- Crossplay (Xbox/Game Pass) is not enabled: it needs a third UDP port.",
+  "world": {
+    "volume": "data",
+    "paths": ["worlds_local"],
+    "variables": ["world_name"]
+  }
 }

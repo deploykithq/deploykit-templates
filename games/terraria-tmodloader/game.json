@@ -152,5 +152,10 @@
     ],
     "directories": [{ "volume": "data", "path": "tModLoader/Mods" }]
   },
-  "notes": "Runs [tModLoader](https://github.com/tModLoader/tModLoader) on the [DeployKit tModLoader image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/tmodloader), which downloads the release from GitHub on the first start.\n\n- Add mods from the **Mods** tab: paste a Steam Workshop link, or search once an admin adds a Steam Web API key in Settings. Workshop items download their latest upload when the server restarts.\n- A `.tmod` uploaded by hand to `tModLoader/Mods` stays enabled.\n- Players need the same mods; tModLoader offers to download them when they join.\n- Disabling a mod a world depends on can break that world, so DeployKit takes a safety backup first.\n- World name, size, difficulty and seed only apply when the world is created.\n- Stopping the server sends `exit`, which saves the world first."
+  "notes": "Runs [tModLoader](https://github.com/tModLoader/tModLoader) on the [DeployKit tModLoader image](https://github.com/deploykithq/deploykit-game-images/tree/master/images/tmodloader), which downloads the release from GitHub on the first start.\n\n- Add mods from the **Mods** tab: paste a Steam Workshop link, or search once an admin adds a Steam Web API key in Settings. Workshop items download their latest upload when the server restarts.\n- A `.tmod` uploaded by hand to `tModLoader/Mods` stays enabled.\n- Players need the same mods; tModLoader offers to download them when they join.\n- Disabling a mod a world depends on can break that world, so DeployKit takes a safety backup first.\n- World name, size, difficulty and seed only apply when the world is created: to start over with new ones, use **Regenerate world** in Settings (mods and their configs are kept).\n- Stopping the server sends `exit`, which saves the world first.",
+  "world": {
+    "volume": "data",
+    "paths": ["tModLoader/Worlds"],
+    "variables": ["world_name", "world_size", "difficulty", "seed"]
+  }
 }
